@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # pylint: disable=missing-docstring
+
 '''
 A fixed-length FIFO class, which operates pretty much how you'd expect.
 

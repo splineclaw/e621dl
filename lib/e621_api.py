@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
-from json import loads
-from support import SpoofOpen
-from collections import namedtuple
 import logging
+from json import loads
+from collections import namedtuple
+from support import SpoofOpen
 
-UPLOAD = namedtuple('Upload', 'id url md5 ext')
+UPLOAD = namedtuple('Upload', 'id url md5 ext tags')
 SPOOF = SpoofOpen()
 
 LIST_BASE = 'https://e621.net/post/index.json?'
@@ -27,7 +27,8 @@ def get_posts(search_term, uploaded_after, page_num, max_results):
 
     uploads = []
     for post in results:
-        uploads.append(UPLOAD(post['id'], post['file_url'], post['md5'], post['file_ext']))
+        uploads.append(UPLOAD(post['id'], post['file_url'], post['md5'], post['file_ext'],
+            post['tags']))
     return uploads
 
 def download(url, filename):

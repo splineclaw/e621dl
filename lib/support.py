@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # pylint: disable=missing-docstring,line-too-long,too-many-public-methods,
 
 import argparse
@@ -79,6 +80,31 @@ def get_tagfile(filename):
 
         log.debug('opened %s and read %d items', filename, len(tag_list))
         return tag_list
+
+def make_default_blacklistfile(filename):
+    log = logging.getLogger('blacklistfile')
+    with open(filename, 'w') as outfile:
+        outfile.write(default.BLACKLIST_FILE)
+
+    log.error('new default file created: ' + filename)
+    log.error('\tadd to this file and re-run the program')
+
+def get_blacklistfile(filename):
+    log = logging.getLogger('blacklist_file')
+
+    if not os.path.isfile(filename):
+        make_default_blacklistfile(filename)
+        return default.BLACKLIST_FILE
+    else:
+        # read out all lines not starting with #
+        blacklist = []
+        for line in open(filename):
+            raw_line = line.strip()
+            if not raw_line.startswith("#") and raw_line != '':
+                blacklist.append(raw_line)
+
+        log.debug('opened %s and read %d items', filename, len(blacklist))
+        return blacklist
 
 def get_cache(filename, size):
     log = logging.getLogger('cache')

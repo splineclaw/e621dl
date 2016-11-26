@@ -1,20 +1,21 @@
 #!/usr/bin/env python
 # pylint: disable=missing-docstring,line-too-long,too-many-public-methods,
+
 import os.path
 import logging
 import sys
-import lib.support as support
-import lib.default as default
+import json
 import datetime
 import cPickle as pickle
-import json
+from multiprocessing import freeze_support
+import lib.support as support
+import lib.default as default
 import lib.e621_api as e621_api
 from lib.downloader import multi_download
 from lib.version import VERSION
-from multiprocessing import freeze_support
 
 if __name__ == '__main__':
-    freeze_support()    
+    freeze_support()
 
 ##############################################################################
 # INITIALIZATION
@@ -24,13 +25,15 @@ if __name__ == '__main__':
 # - open file containing tracked tags
 # - populate the recent downloads cache
 ##############################################################################
-    CONFIG_FILE = 'config.txt' # modify to use different config file
+    CONFIG_FILE = 'config.txt'
+    TAG_FILE = 'tags.txt'
+    BLACKLIST_FILE = 'blacklist.txt'
 
     # set up logging
     logging.basicConfig(
-            level=support.get_verbosity_level(),
-            format=default.LOGGER_FMT,
-            stream=sys.stderr)
+        level=support.get_verbosity_level(),
+        format=default.LOGGER_FMT,
+        stream=sys.stderr)
     LOG = logging.getLogger('e621dl')
 
     # report current version
@@ -45,11 +48,15 @@ if __name__ == '__main__':
     EARLY_TERMINATE |= not support.validate_config(CONFIG)
 
     # read the tags file.  if not found, create a new one
-    EARLY_TERMINATE |= not os.path.isfile(CONFIG['tag_file'])
-    TAGS = support.get_tagfile(CONFIG['tag_file'])
+    EARLY_TERMINATE |= not os.path.isfile(TAG_FILE)
+    TAGS = support.get_tagfile(TAG_FILE)
 
     # are there any tags in the tags file?
-    EARLY_TERMINATE |= not support.validate_tagfile(TAGS, CONFIG['tag_file'])
+    EARLY_TERMINATE |= not support.validate_tagfile(TAGS, TAG_FILE)
+
+    # read the blacklist file.  if not found, create a new one
+    EARLY_TERMINATE |= not os.path.isfile(BLACKLIST_FILE)
+    BLACKLIST = support.get_blacklistfile(BLACKLIST_FILE)
 
     # open the cache (this can't really fail; just creates a new blank one)
     CACHE = support.get_cache(CONFIG['cache_name'], CONFIG['cache_size'])
@@ -90,7 +97,7 @@ if __name__ == '__main__':
 
         while accumulating:
             links_found = e621_api.get_posts(line, CONFIG['last_run'],
-                    current_page, default.MAX_RESULTS)
+                current_page, default.MAX_RESULTS)
 
             if not links_found:
                 accumulating = False
@@ -159,7 +166,8 @@ if __name__ == '__main__':
     if URL_AND_NAME_LIST:
         LOG.info('successfully downloaded %d files', TOTAL_DOWNLOADS)
     YESTERDAY = datetime.date.fromordinal(datetime.date.today().toordinal()-1)
-    CONFIG['last_run'] = YESTERDAY.strftime(default.DATETIME_FMT)
+    # CONFIG['last_run'] = YESTERDAY.strftime(default.DATETIME_FMT)
+    CONFIG['last_run'] = '1776-07-04'
 
     with open(CONFIG_FILE, 'wb') as outfile:
         json.dump(CONFIG, outfile, indent=4,

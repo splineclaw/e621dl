@@ -3,5 +3,3 @@
 *.txt
 *.pyc
 downloads/
-build/dist
-build/build

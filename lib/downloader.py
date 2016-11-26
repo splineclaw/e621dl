@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 #pylint: disable=missing-docstring,invalid-name,too-many-public-methods
+
 import logging
 from urllib import FancyURLopener
 from multiprocessing import Pool, Manager, Process
@@ -28,7 +29,7 @@ def update_progress(progress):
         status = "Done...        \r\n"
     block = int(round(barLength*progress))
     text = "\rDownloading:        [{0}] {1:6.2f}% {2}".format(
-            "#"*block + "-"*(barLength-block), progress*100, status)
+        "#"*block + "-"*(barLength-block), progress*100, status)
     sys.stdout.write(text)
     sys.stdout.flush()
 
@@ -72,12 +73,12 @@ def multi_download(url_and_name_list, num_threads=8):
     log.debug('starting pool with ' + str(num_threads) + ' workers')
 
     monitor_thread = Process(target=download_monitor,
-            args=((m_list, len(url_and_name_list)),))
+        args=((m_list, len(url_and_name_list)),))
 
     monitor_thread.start()
     workers = Pool(processes=num_threads)
     work = workers.map_async(single_download,
-            zip(url_and_name_list, repeat(m_list)))
+        zip(url_and_name_list, repeat(m_list)))
 
     # this hack makes the async_map respond to ^C interrupts
     try:

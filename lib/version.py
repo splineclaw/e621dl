@@ -1,2 +1,3 @@
 #!/usr/bin/env python
-VERSION = "2.4.6"
+
+VERSION = "1.0.0 -- Forked from 2.4.6"
