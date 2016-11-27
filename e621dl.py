@@ -189,8 +189,7 @@ if __name__ == '__main__':
     if URL_AND_NAME_LIST:
         LOG.info('successfully downloaded %d files', len(URL_AND_NAME_LIST))
 
-    # Don't forget to change the 7 back to a 1 to make it actually yesterday.
-    YESTERDAY = datetime.date.fromordinal(datetime.date.today().toordinal()-7)
+    YESTERDAY = datetime.date.fromordinal(datetime.date.today().toordinal()-1)
     CONFIG['last_run'] = YESTERDAY.strftime(default.DATETIME_FMT)
     #CONFIG['last_run'] = '1776-07-04'
 
