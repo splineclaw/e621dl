@@ -169,7 +169,7 @@ if __name__ == '__main__':
                     CACHE.push(item.md5)
 
             LOG.debug('update for %s completed\n', line)
-            LOG.info('%d new (%d found, %d missing tags, %d blacklisted, %d existing, %d cached)\n',
+            LOG.info('%d new (%d found, %d missing tags, %d blacklisted, %d downloaded, %d cached)\n',
                 will_download, len(potential_downloads), links_missing_tags, links_blacklisted,
                 links_on_disk, links_in_cache)
 
