@@ -2,11 +2,11 @@
 #pylint: disable=missing-docstring,invalid-name,too-many-public-methods
 
 import logging
+import sys
 from urllib import FancyURLopener
 from multiprocessing import Pool, Manager, Process
 from time import sleep
 from itertools import repeat
-import sys
 
 class SpoofOpen(FancyURLopener):
     version = 'Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.8.0.12) ' + \

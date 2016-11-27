@@ -35,6 +35,9 @@ BLACKLIST_FILE = '''# NOTE: All lines in this file that begin with # are treated
 # Add any tags for posts you would like to AVOID downloading to this file. Meta-tags will break the
 # program, so do not use them in this file.
 #
-# Please include each blacklist tag on a different line.
+# PLEASE CHECK THE E621 WIKI AND MAKE SURE TO CONVERT TAG ALIASES. THIS PROGRAM, CURRENTLY, CAN
+# ONLY BLACKLIST OFFICIAL TAGS.
+#
+# Give each blacklist tag its own new line.
 #
 '''

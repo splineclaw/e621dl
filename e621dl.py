@@ -120,18 +120,30 @@ if __name__ == '__main__':
                 LOG.debug('item md5 = %d', item.md5)
                 current = '\t(' + str(idx) + ') '
 
+                currentTags = item.tags.split()
+                skip = False
+
                 # construct full filename
                 filename = support.safe_filename(line, item, CONFIG)
+
+                # skip if blacklisted, set boolean, find a cleaner way to do this.
+                for i, tag in enumerate(currentTags):
+                    if currentTags[i] in BLACKLIST:
+                        skip = True
 
                 # skip if already in download directory
                 if os.path.isfile(CONFIG['download_directory'] + filename):
                     links_on_disk += 1
-                    LOG.debug('%s skipped (already in download dir', current)
+                    LOG.debug('%s skipped (already in download directory)', current)
 
                 # skip if already in cache
                 elif item.md5 in CACHE:
                     links_in_cache += 1
                     LOG.debug('%s skipped (previously downloaded)', current)
+
+                # skip if blacklisted, test boolean, find a cleaner way to do this.
+                elif skip == True:
+                    LOG.debug('%s skipped (tag found in blacklist)')
 
                 # otherwise, download it
                 else:
@@ -162,7 +174,7 @@ if __name__ == '__main__':
 # - report number of downloads in this session
 # - set last run to yesterday (see FAQ for why it isn't today)
 ##############################################################################
-    pickle.dump(CACHE, open('.cache', 'wb'), pickle.HIGHEST_PROTOCOL)
+    # pickle.dump(CACHE, open('.cache', 'wb'), pickle.HIGHEST_PROTOCOL)
     if URL_AND_NAME_LIST:
         LOG.info('successfully downloaded %d files', TOTAL_DOWNLOADS)
     YESTERDAY = datetime.date.fromordinal(datetime.date.today().toordinal()-1)
