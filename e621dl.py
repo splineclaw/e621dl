@@ -77,27 +77,39 @@ if __name__ == '__main__':
 #       - if the file has not previously been downloaded, download it
 # - count number of downloads for reporting in post-update
 ##############################################################################
-    LOG.info("e621dl was last run on %s", CONFIG['last_run'])
-
-    # keeps running total of files downloaded in this run
-    TOTAL_DOWNLOADS = 0
+    LOG.info("e621dl was last run on %s\n", CONFIG['last_run'])
 
     URL_AND_NAME_LIST = []
 
     for line in TAGS:
-        LOG.debug("Checking for new uploads tagged: %s", line)
+        LOG.info("Checking for new uploads tagged: %s", line)
 
         # prepare to start accumulating list of download links for line
         accumulating = True
         current_page = 1
+        links_missing_tags = 0
         links_blacklisted = 0
         links_in_cache = 0
         links_on_disk = 0
         will_download = 0
         potential_downloads = []
+        extra_tags = []
+
+        all_tags = line.split()
+
+        if len(all_tags) > 5:
+            search_tags = '%s %s %s %s %s' %(all_tags[0], all_tags[1], all_tags[2], all_tags[3],
+                all_tags[4])
+
+            for i in all_tags:
+                if i not in search_tags.split():
+                    extra_tags.append(i)
+
+        else:
+            search_tags = line
 
         while accumulating:
-            links_found = e621_api.get_posts(line, CONFIG['last_run'],
+            links_found = e621_api.get_posts(search_tags, CONFIG['last_run'],
                 current_page, default.MAX_RESULTS)
 
             if not links_found:
@@ -109,8 +121,6 @@ if __name__ == '__main__':
                 # continue accumulating if found == max, else stop accumulation
                 accumulating = len(links_found) == default.MAX_RESULTS
                 current_page += 1
-
-        LOG.info('%d new uploads tagged: %s', len(potential_downloads), line)
 
         if len(potential_downloads) > 0:
 
@@ -127,8 +137,13 @@ if __name__ == '__main__':
                 # split the post's tags into a comparable list.
                 currentTags = item.tags.split()
 
+                # skip if missing a tag
+                if list(set(extra_tags) & set(currentTags)) == []:
+                    links_missing_tags +=1
+                    LOG.debug('%s skipped (missing a requested tag)')
+
                 # skip if blacklisted
-                if list(set(BLACKLIST) & set(currentTags)) != []:
+                elif list(set(BLACKLIST) & set(currentTags)) != []:
                     links_blacklisted += 1
                     LOG.debug('%s skipped (contains a blacklisted tag)')
 
@@ -147,18 +162,17 @@ if __name__ == '__main__':
                     LOG.debug('%s will be downloaded', current)
                     URL_AND_NAME_LIST.append(
                         (item.url, CONFIG['download_directory'] + filename))
-
                     will_download += 1
+
                     # push to cache, write cache to disk
                     CACHE.push(item.md5)
-                    TOTAL_DOWNLOADS += 1
 
             LOG.debug('update for %s completed\n', line)
-            LOG.info('%d total (%d new, %d blacklisted, %d existing, %d cached)\n',
-                TOTAL_DOWNLOADS, will_download, links_blacklisted, links_on_disk, links_in_cache)
+            LOG.info('%d new (%d found, %d missing tags, %d blacklisted, %d existing, %d cached)\n',
+                will_download, len(potential_downloads), links_missing_tags, links_blacklisted,
+                links_on_disk, links_in_cache)
 
     if URL_AND_NAME_LIST:
-        print ''
         LOG.info('starting download of %d files', len(URL_AND_NAME_LIST))
         multi_download(URL_AND_NAME_LIST, CONFIG['parallel_downloads'])
     else:
@@ -169,14 +183,16 @@ if __name__ == '__main__':
 # WRAP-UP
 # - write cache out to disk
 # - report number of downloads in this session
-# - set last run to yesterday (see FAQ for why it isn't today)
+# - set last run to yesterday
 ##############################################################################
-    # pickle.dump(CACHE, open('.cache', 'wb'), pickle.HIGHEST_PROTOCOL)
+    #pickle.dump(CACHE, open('.cache', 'wb'), pickle.HIGHEST_PROTOCOL)
     if URL_AND_NAME_LIST:
-        LOG.info('successfully downloaded %d files', TOTAL_DOWNLOADS)
-    YESTERDAY = datetime.date.fromordinal(datetime.date.today().toordinal()-1)
-    # CONFIG['last_run'] = YESTERDAY.strftime(default.DATETIME_FMT)
-    CONFIG['last_run'] = '1776-07-04'
+        LOG.info('successfully downloaded %d files', len(URL_AND_NAME_LIST))
+
+    # Don't forget to change the 7 back to a 1 to make it actually yesterday.
+    YESTERDAY = datetime.date.fromordinal(datetime.date.today().toordinal()-7)
+    CONFIG['last_run'] = YESTERDAY.strftime(default.DATETIME_FMT)
+    #CONFIG['last_run'] = '1776-07-04'
 
     with open(CONFIG_FILE, 'wb') as outfile:
         json.dump(CONFIG, outfile, indent=4,
