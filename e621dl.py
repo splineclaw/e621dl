@@ -107,6 +107,7 @@ if __name__ == '__main__':
 
         else:
             search_tags = line
+            extra_tags = line.split()
 
         while accumulating:
             links_found = e621_api.get_posts(search_tags, CONFIG['last_run'],
