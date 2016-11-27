@@ -90,6 +90,7 @@ if __name__ == '__main__':
         # prepare to start accumulating list of download links for line
         accumulating = True
         current_page = 1
+        links_blacklisted = 0
         links_in_cache = 0
         links_on_disk = 0
         will_download = 0
@@ -120,19 +121,19 @@ if __name__ == '__main__':
                 LOG.debug('item md5 = %d', item.md5)
                 current = '\t(' + str(idx) + ') '
 
-                currentTags = item.tags.split()
-                skip = False
-
                 # construct full filename
                 filename = support.safe_filename(line, item, CONFIG)
 
-                # skip if blacklisted, set boolean, find a cleaner way to do this.
-                for i, tag in enumerate(currentTags):
-                    if currentTags[i] in BLACKLIST:
-                        skip = True
+                # split the post's tags into a comparable list.
+                currentTags = item.tags.split()
+
+                # skip if blacklisted
+                if list(set(BLACKLIST) & set(currentTags)) != []:
+                    links_blacklisted += 1
+                    LOG.debug('%s skipped (contains a blacklisted tag)')
 
                 # skip if already in download directory
-                if os.path.isfile(CONFIG['download_directory'] + filename):
+                elif os.path.isfile(CONFIG['download_directory'] + filename):
                     links_on_disk += 1
                     LOG.debug('%s skipped (already in download directory)', current)
 
@@ -140,10 +141,6 @@ if __name__ == '__main__':
                 elif item.md5 in CACHE:
                     links_in_cache += 1
                     LOG.debug('%s skipped (previously downloaded)', current)
-
-                # skip if blacklisted, test boolean, find a cleaner way to do this.
-                elif skip == True:
-                    LOG.debug('%s skipped (tag found in blacklist)')
 
                 # otherwise, download it
                 else:
@@ -157,8 +154,8 @@ if __name__ == '__main__':
                     TOTAL_DOWNLOADS += 1
 
             LOG.debug('update for %s completed\n', line)
-            LOG.info('%5d total (+%d new, %d existing, %d cached)\n',
-                TOTAL_DOWNLOADS, will_download, links_on_disk, links_in_cache)
+            LOG.info('%d total (%d new, %d blacklisted, %d existing, %d cached)\n',
+                TOTAL_DOWNLOADS, will_download, links_blacklisted, links_on_disk, links_in_cache)
 
     if URL_AND_NAME_LIST:
         print ''
