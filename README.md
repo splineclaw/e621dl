@@ -1,6 +1,6 @@
 # What is **e621dl**?
 
-**e621dl** is an automated script which downloads content from e621.net. It can be used to create a local mirror of your favorite searches, and keep these searches up to date as new files are uploaded.
+**e621dl** is an automated script, originally by [**@wwyaiykycnf**](https://github.com/wwyaiykycnf), which downloads content from e621.net. It can be used to create a local mirror of your favorite searches, and keep these searches up to date as new files are uploaded.
 
 # How does **e621dl** work?
 
@@ -8,7 +8,7 @@ Put very simply, when **e621dl** starts, it determines the following:
 
 1. Which searches you would like to perform by reading `tag.txt`.
 2. Which tags you would like to avoid seeing by reading `blacklist.txt`.
-3. The last time it was run.
+3. The last time it was run by reading `config.txt`.
 
 Once it knows these things, it goes through the searches one by one, and downloads _only_ content uploaded since the last time it was run.
 
@@ -84,7 +84,7 @@ parallel_downloads | No                      | Integer 1 to 16      | The maximu
 cache_name         | Yes                     | Valid system path    | The path of the file that **e621dl** will use to track previous downloads.
 cache_size         | No                      | Any positive integer | The maximum number of items **e621dl** will keep in the cache.
 
-# Normal Operation
+## Normal Operation
 
 Once you have added at least one group to the tags file, you should see something similar to this when you run **e621dl**:
 
@@ -106,17 +106,17 @@ e621dl      INFO     Last run updated to 2016-11-26.
 
 There is quite a bit of information here. Since last time **e621dl** was run on 2014-06-27, there have been 8 uploads that match the search "cat". One post did not contain every tag which we specified. This is because e621 will only accept 5 initial tags and any additional tags are checked by e621dl. 1 post has a tag that was in our blacklist, so it will be skipped. 2 posts have already been downloaded in a previous run, so they will also be skipped. The 4 remaining posts will be downloaded and added the downloads folder. Once they have been downloaded, **e621dl** updates its last run date to the day before it was run, 2014-11-26, and is ready for its next use.
 
-## Automation of **e621dl**
+# Automation of **e621dl**
 
 It should be recognized that **e621dl**, as a script, can be scheduled to run nightly, keeping the user's local collections always up-to-date, however, the methods for doing this are dependent on the user's platform, and are outside the scope of this guide.
 
-# Feedback and Feature Requests
+# Feedback and Requests
 
-If you have any ideas on how to make this script run better, or for features you would like to see in the future, open a detailed issue and I will try to read it as soon as possible.
+If you have any ideas on how to make this script run better, or for features you would like to see in the future, [open an issue](https://github.com/Wulfre/e621dl/issues) and I will try to read it as soon as possible.
 
 # Donations
 
-Since this script was initially written by @wwyaiykycnf I will leave their donation section as it was before I forked the repository.
+Since this script was initially written by [**@wwyaiykycnf**](https://github.com/wwyaiykycnf) I will leave their donation section as it was before I forked the repository.
 
 If you've benefitted from this _free_ project, why not [buy me something on Amazon?](http://amzn.com/w/20RZIUHXLO6R4) There's tons of cheap bullshit on there I would totally get a kick out of owning.
 
