@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# pylint: disable=missing-docstring,line-too-long,too-many-public-methods,
 
 import argparse
 import logging
@@ -12,22 +11,24 @@ import os
 from types import IntType, BooleanType
 from urllib import FancyURLopener
 
+
 class SpoofOpen(FancyURLopener):
     version = 'Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.8.0.12) Gecko/20070731 Ubuntu/dapper-security Firefox/1.5.0.12'
+
 
 def get_verbosity_level():
 
     # build the parser
     parser = argparse.ArgumentParser(prog='e621dl',
-        description='automated e621 downloader.\
+                                     description='automated e621 downloader.\
         add artists/tags to tags.txt and run!')
 
     # add mutually exclusive options verbose/quiet
     verbosity = parser.add_mutually_exclusive_group(required=False)
     verbosity.add_argument('-v', '--verbose', action='store_true',
-        help='display debug information while running')
+                           help='display debug information while running')
     verbosity.add_argument('-q', '--quiet', action='store_true',
-        help='display no output while running (except errors)')
+                           help='display no output while running (except errors)')
 
     # parse using argparser
     args = parser.parse_args()
@@ -39,13 +40,15 @@ def get_verbosity_level():
     else:
         return logging.INFO
 
+
 def make_default_configfile(filename):
     log = logging.getLogger('configfile')
     log.error('new default file created: ' + filename)
-    log.error('\tverify this file and re-run the program')
+    log.error('verify this file and re-run the program')
     with open(filename, 'w') as outfile:
         json.dump(default.CONFIG_FILE, outfile, indent=4, sort_keys=True,)
     return default.CONFIG_FILE
+
 
 def get_configfile(filename):
     log = logging.getLogger('configfile')
@@ -56,13 +59,15 @@ def get_configfile(filename):
             log.debug('opened ' + filename)
             return json.load(infile)
 
+
 def make_default_tagfile(filename):
     log = logging.getLogger('tagfile')
     with open(filename, 'w') as outfile:
         outfile.write(default.TAG_FILE)
 
     log.error('new default file created: ' + filename)
-    log.error('\tadd to this file and re-run the program')
+    log.error('add to this file and re-run the program')
+
 
 def get_tagfile(filename):
     log = logging.getLogger('tag_file')
@@ -81,13 +86,15 @@ def get_tagfile(filename):
         log.debug('opened %s and read %d items', filename, len(tag_list))
         return tag_list
 
+
 def make_default_blacklistfile(filename):
     log = logging.getLogger('blacklistfile')
     with open(filename, 'w') as outfile:
         outfile.write(default.BLACKLIST_FILE)
 
     log.error('new default file created: ' + filename)
-    log.error('\tadd to this file and re-run the program')
+    log.error('add to this file and re-run the program')
+
 
 def get_blacklistfile(filename):
     log = logging.getLogger('blacklist_file')
@@ -106,6 +113,7 @@ def get_blacklistfile(filename):
         log.debug('opened %s and read %d items', filename, len(blacklist))
         return blacklist
 
+
 def get_cache(filename, size):
     log = logging.getLogger('cache')
     try:
@@ -113,7 +121,7 @@ def get_cache(filename, size):
         cache.resize(int(size))
         log.debug('loaded existing cache')
         log.debug('capacity = %d (of %d)', len(cache), cache.size())
-        log.debug('size on disk = %f kb', os.path.getsize(filename)/1024)
+        log.debug('size on disk = %f kb', os.path.getsize(filename) / 1024)
 
     except IOError:
         cache = FixedFifo.FixedFifo(size)
@@ -126,6 +134,7 @@ def sub_char(char):
     illegal = ['\\', '/', ':', '*', '?', '"', '<', '>', '|', ' ']
     return '_' if char in illegal else char
 
+
 def safe_filename(tag_line, item, config_dict):
     safe_tagline = ''.join([sub_char(c) for c in tag_line])
 
@@ -136,17 +145,20 @@ def safe_filename(tag_line, item, config_dict):
         safe_filename = safe_tagline + '/' + name + '.' + item.ext
 
     else:
-        safe_filename = safe_tagline.decode('utf-8') + '_' + name + '.' + item.ext.decode('utf-8')
+        safe_filename = safe_tagline.decode(
+            'utf-8') + '_' + name + '.' + item.ext.decode('utf-8')
 
     return safe_filename
+
 
 def validate_tagfile(tags, filename):
     if len(tags) == 0:
         log = logging.getLogger('tag_file')
         log.error('no tags found in %s', filename)
-        log.error('\tadd lines to this file and re-run program')
+        log.error('add lines to this file and re-run program')
         return False
     return True
+
 
 def validate_config(c):
     log = logging.getLogger('config_file')

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# pylint: disable=bad-whitespace, missing-docstring
 
 from datetime import datetime
 

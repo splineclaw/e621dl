@@ -5,7 +5,7 @@
 Put very simply, when **e621dl** starts, it determines:
 
 1. Which searches you would like to perform by reading `tag.txt`.
-2. Which tags you would like to avoid seeing by reading `blacklist.txt`).
+2. Which tags you would like to avoid seeing by reading `blacklist.txt`.
 3. The last time it was run by reading `config.txt`.
 
 Once it knows these things, it goes through the searches one by one, and downloads *only* content uploaded since the last time it was run.
@@ -89,7 +89,7 @@ Savvy users should realize at this point that they could simply schedule **e621d
 If you have any ideas for how things might work better, or about features you'd like to see in the future, open an issue and I will try to read it as soon as possible.
 
 ## Donations
-Since this script was initially written by @wwyaiykycnf I will leave their donation section exactly the way they left it before I forked the repository.
+Since this script was initially written by @wwyaiykycnf I will leave their donation section as it was before I forked the repository.
 
 If you've benefitted from this *free* project, why not [buy me something on Amazon?](http://amzn.com/w/20RZIUHXLO6R4) There's tons of cheap bullshit on there I would totally get a kick out of owning.   
 

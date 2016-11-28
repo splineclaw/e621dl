@@ -14,6 +14,7 @@ DATE = ' date:>'
 PAGE = '&page='
 MAX = '&limit='
 
+
 def get_posts(search_term, uploaded_after, page_num, max_results):
     request = LIST_BASE + \
         TAGS + search_term + \
@@ -28,8 +29,9 @@ def get_posts(search_term, uploaded_after, page_num, max_results):
     uploads = []
     for post in results:
         uploads.append(UPLOAD(post['id'], post['file_url'], post['md5'], post['file_ext'],
-            post['tags']))
+                              post['tags']))
     return uploads
+
 
 def download(url, filename):
     with open(filename, 'wb') as dest:

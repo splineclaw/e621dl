@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-#pylint: disable=missing-docstring,invalid-name,too-many-public-methods
 
 import logging
 import sys
@@ -8,13 +7,14 @@ from multiprocessing import Pool, Manager, Process
 from time import sleep
 from itertools import repeat
 
+
 class SpoofOpen(FancyURLopener):
     version = 'Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.8.0.12) ' + \
-            'Gecko/20070731 Ubuntu/dapper-security Firefox/1.5.0.12'
+        'Gecko/20070731 Ubuntu/dapper-security Firefox/1.5.0.12'
 
 
 def update_progress(progress):
-    barLength = 35 # Modify this to change the length of the progress bar
+    barLength = 35  # Modify this to change the length of the progress bar
     status = ""
     if isinstance(progress, int):
         progress = float(progress)
@@ -27,9 +27,9 @@ def update_progress(progress):
     if progress >= 1:
         progress = 1
         status = "Done...        \r\n"
-    block = int(round(barLength*progress))
+    block = int(round(barLength * progress))
     text = "\rDownloading:        [{0}] {1:6.2f}% {2}".format(
-        "#"*block + "-"*(barLength-block), progress*100, status)
+        "#" * block + "-" * (barLength - block), progress * 100, status)
     sys.stdout.write(text)
     sys.stdout.flush()
 
@@ -55,7 +55,7 @@ def download_monitor(args):
     managed_list, total_items = args
     print ''
     while True:
-        progress = float(len(managed_list))/float(total_items)
+        progress = float(len(managed_list)) / float(total_items)
         update_progress(progress)
         if total_items == len(managed_list):
             return
@@ -66,19 +66,19 @@ def multi_download(url_and_name_list, num_threads=8):
     ''' accepts list of tuples, where t[0] = url and t[1] = filename '''
     manager = Manager()
 
-    #pylint: disable=no-member
+    # pylint: disable=no-member
     m_list = manager.list()
-    #pylint: enable=no-member
+    # pylint: enable=no-member
     log = logging.getLogger('multi_dl')
     log.debug('starting pool with ' + str(num_threads) + ' workers')
 
     monitor_thread = Process(target=download_monitor,
-        args=((m_list, len(url_and_name_list)),))
+                             args=((m_list, len(url_and_name_list)),))
 
     monitor_thread.start()
     workers = Pool(processes=num_threads)
     work = workers.map_async(single_download,
-        zip(url_and_name_list, repeat(m_list)))
+                             zip(url_and_name_list, repeat(m_list)))
 
     # this hack makes the async_map respond to ^C interrupts
     try:

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# pylint: disable=missing-docstring,line-too-long,too-many-public-methods,
 
 import os.path
 import logging
@@ -98,8 +97,8 @@ if __name__ == '__main__':
         all_tags = line.split()
 
         if len(all_tags) > 5:
-            search_tags = '%s %s %s %s %s' %(all_tags[0], all_tags[1], all_tags[2], all_tags[3],
-                all_tags[4])
+            search_tags = '%s %s %s %s %s' % (all_tags[0], all_tags[1], all_tags[2], all_tags[3],
+                                              all_tags[4])
 
             for i in all_tags:
                 if i not in search_tags.split():
@@ -111,7 +110,7 @@ if __name__ == '__main__':
 
         while accumulating:
             links_found = e621_api.get_posts(search_tags, CONFIG['last_run'],
-                current_page, default.MAX_RESULTS)
+                                             current_page, default.MAX_RESULTS)
 
             if not links_found:
                 accumulating = False
@@ -140,7 +139,7 @@ if __name__ == '__main__':
 
                 # skip if missing a tag
                 if list(set(extra_tags) & set(currentTags)) == []:
-                    links_missing_tags +=1
+                    links_missing_tags += 1
                     LOG.debug('%s skipped (missing a requested tag)')
 
                 # skip if blacklisted
@@ -151,7 +150,8 @@ if __name__ == '__main__':
                 # skip if already in download directory
                 elif os.path.isfile(CONFIG['download_directory'] + filename):
                     links_on_disk += 1
-                    LOG.debug('%s skipped (already in download directory)', current)
+                    LOG.debug(
+                        '%s skipped (already in download directory)', current)
 
                 # skip if already in cache
                 elif item.md5 in CACHE:
@@ -170,8 +170,9 @@ if __name__ == '__main__':
 
             LOG.debug('update for %s completed\n', line)
             LOG.info('%d new (%d found, %d missing tags, %d blacklisted, %d downloaded, %d cached)\n',
-                will_download, len(potential_downloads), links_missing_tags, links_blacklisted,
-                links_on_disk, links_in_cache)
+                     will_download, len(
+                         potential_downloads), links_missing_tags, links_blacklisted,
+                     links_on_disk, links_in_cache)
 
     if URL_AND_NAME_LIST:
         LOG.info('starting download of %d files', len(URL_AND_NAME_LIST))
@@ -190,13 +191,14 @@ if __name__ == '__main__':
     if URL_AND_NAME_LIST:
         LOG.info('successfully downloaded %d files', len(URL_AND_NAME_LIST))
 
-    YESTERDAY = datetime.date.fromordinal(datetime.date.today().toordinal()-1)
+    YESTERDAY = datetime.date.fromordinal(
+        datetime.date.today().toordinal() - 1)
     CONFIG['last_run'] = YESTERDAY.strftime(default.DATETIME_FMT)
     #CONFIG['last_run'] = '1776-07-04'
 
     with open(CONFIG_FILE, 'wb') as outfile:
         json.dump(CONFIG, outfile, indent=4,
-            sort_keys=True, ensure_ascii=False)
+                  sort_keys=True, ensure_ascii=False)
 
     LOG.info('last run updated to %s', CONFIG['last_run'])
 
