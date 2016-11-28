@@ -73,7 +73,6 @@ if __name__ == '__main__':
     ALIASED_BLACKLIST = []
     for tag in BLACKLIST:
         ALIASED_BLACKLIST.append(e621_api.get_alias(tag))
-        print e621_api.get_alias(tag)
 
 ##############################################################################
 # UPDATE
