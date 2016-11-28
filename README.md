@@ -6,17 +6,18 @@
 
 Put very simply, when **e621dl** starts, it determines the following:
 
-1. Which searches you would like to perform by reading `tag.txt`.
-2. Which tags you would like to avoid seeing by reading `blacklist.txt`.
-3. The last time it was run by reading `config.txt`.
+- Which searches you would like to perform by reading `tag.txt`.
+- Which tags you would like to avoid seeing by reading `blacklist.txt`.
+- The last time it was run by reading `config.txt`.
 
 Once it knows these things, it goes through the searches one by one, and downloads _only_ content uploaded since the last time it was run.
 
 # Installing **e621dl**
 
-- _You must have Python 2, [which you can find here](https://www.python.org/downloads/)._
-- [Download the latest release of **e621dl**.](https://github.com/wulfre/e621dl/releases/latest)
-- Decompress the archive in any directory you would like.
+- Download and install [the latest release of Python 2](https://www.python.org/downloads/).
+- Download [the latest release of **e621dl**](https://github.com/wulfre/e621dl/releases/latest).
+
+  - Decompress the archive in any directory you would like.
 
 # Running **e621dl**
 

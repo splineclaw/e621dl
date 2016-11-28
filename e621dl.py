@@ -16,14 +16,15 @@ from lib.version import VERSION
 if __name__ == '__main__':
     freeze_support()
 
-##############################################################################
-# INITIALIZATION
+##########################################################################
+# INITIALIZE
 # - parse command line arguments
 # - create a logger to show runtime messages
-# - open config file
-# - open file containing tracked tags
+# - open config, tag, and blacklist files
 # - populate the recent downloads cache
-##############################################################################
+# - alias the blacklist tags
+##########################################################################
+
     CONFIG_FILE = 'config.txt'
     TAG_FILE = 'tags.txt'
     BLACKLIST_FILE = 'blacklist.txt'
@@ -69,18 +70,20 @@ if __name__ == '__main__':
         LOG.error('Error(s) encountered during initialization, see above.')
         sys.exit(-1)
 
-    # alias the blacklisted
+    # alias the blacklist
     ALIASED_BLACKLIST = []
     for tag in BLACKLIST:
         ALIASED_BLACKLIST.append(e621_api.get_alias(tag))
 
-##############################################################################
+##########################################################################
 # UPDATE
 # - for each tag (or tag group) in the tagfile:
-#   - for each upload since the last time e621dl was run:
-#       - if the file has not previously been downloaded, download it
-# - count number of downloads for reporting in post-update
-##############################################################################
+#     - for each upload since the last time e621dl was run:
+#         - if the file has not previously been downloaded and is not on the
+#           blacklist , download it.
+# - report findings.
+##########################################################################
+
     LOG.info("e621dl was last run on %s.\n", CONFIG['last_run'])
 
     URL_AND_NAME_LIST = []
@@ -184,14 +187,15 @@ if __name__ == '__main__':
     else:
         LOG.info('Nothing to download.')
 
-
-##############################################################################
-# WRAP-UP
+##########################################################################
+# FINISH
 # - write cache out to disk
 # - report number of downloads in this session
 # - set last run to yesterday
-##############################################################################
+##########################################################################
+
     #pickle.dump(CACHE, open('.cache', 'wb'), pickle.HIGHEST_PROTOCOL)
+
     if URL_AND_NAME_LIST:
         LOG.info('Successfully downloaded %d files.', len(URL_AND_NAME_LIST))
 
