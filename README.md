@@ -22,38 +22,45 @@ Once it knows these things, it goes through the searches one by one, and downloa
 
 - Open the terminal/command line in the directory you installed e621dl, and run `e621dl.py`
 
-  - You may need to type `python e621dl.py` if python is not in your path.
+  - You may need to run the command as `python e621dl.py` if python is not in your path.
   - **Do not** double-click on `e621dl.py`. You **must** run it from the command line.
 
 ## First-Time Run
 
-The first time you run **e621dl**, you should see something like:
+The first time you run **e621dl**, you should see something similar to the following:
 
 ```
-e621dl      INFO     running e621dl version 2.5.2 -- Forked from 2.4.6
-config      ERROR    new default file created: config.txt
-config      ERROR    verify this file and re-run the program
-config      INFO     empty download directory created
-tags        ERROR    new default file created: tags.txt
-tags        ERROR    add to this file and re-run the program
-blacklist   ERROR    new default file created: blacklist.txt
-blacklist   ERROR    add to this file and re-run the program
-e621dl      ERROR    error(s) encountered during initialization, see above
+e621dl      INFO     Running e621dl version 2.5.2b -- Forked from 2.4.6.
+config      ERROR    New default file created: config.txt.
+config      ERROR    Verify this file, then re-run the program.
+config      INFO     Download directory created.
+tags        ERROR    New default file created: tags.txt.
+tags        ERROR    Add to this file, then re-run the program.
+blacklist   ERROR    New default file created: blacklist.txt.
+e621dl      ERROR    Error(s) encountered during initialization, see above.
 ```
 
-It's not as bad as it looks. **e621dl** is telling you that it couldn't the _config_, _tags_, or _blacklist_ files, so it created them. This is totally normal behavior.
+These errors are normal behavior for a first run, and should not raise any alarm. **e621dl** is telling you that it was unable to find the _config_, _tags_, or _blacklist_ files, nor the _downloads_ folder, so it created them.
 
 ## Add searches to the tags file.
 
-You must add at least one search you would like to perform to the tags file. Open it to find the most up-to-date instructions on how to configure it.
+Add any tags or meta-tags for posts you would like to download to this file. Each line in this file will be treated as a separate group, and a new folder inside the downloads directory will be created for each group.
+
+_If your group contains more than 5 tags, please check the e621 wiki and make sure to convert tag aliases. Due to the nature of e621's search function, only 5 tags can be converted automatically. All additional tags are manually checked by e621dl. In the future, a local alias converter may be added so that you do not need to convert them manually. Another side effect of this workaround is that you may only use up to 5 meta-tags per group, and they must be the first 5 items on the line._
 
 ## [Optional] Add tags to the blacklist file.
 
-If there are any tags you would like to avoid, you must add them to the blacklist file. Open it to find the most up-to-date instructions on how to configure it.
+Add any tags for posts you would like to avoid downloading to this file. Meta-tags will currently break the script, as they are not filtered out, so do not use them in this file.
+
+_This script, currently, can only blacklist official tags. In the future, a local alias converter may be added so that you do not need to convert them manually. Until then, be sure to check your tags against the e621 wiki to avoid seeing any content you do not want to._
+
+Give each tag its own new line.
 
 ## [Optional] Modify the config file.
 
-Most users will not need to modify the config file, `config.txt`, but feel free to edit it to your liking after reading the description, and values for each key. Please respect which values need quotation marks, as the script will fail to run if any are missing. The quotation marks indicate a _string value_ as opposed to a _boolean_ or _integer_ value, which python can interpret only without quotation marks.
+Most users will not need to modify the config file, `config.txt`, but feel free to edit it to your liking after reading the description, and acceptable values for each key. Please respect which values need quotation marks, as the script will fail to run if any are missing.
+
+The quotation marks indicate a _string value_, which python can only interpret _with_ quotation marks, as opposed to a _boolean_ or _integer_ value, which python can only interpret _without_ quotation marks.
 
 ### Config Keys, Values, and Descriptions
 
@@ -78,31 +85,33 @@ cache_size         | No                      | Any positive integer | The maximu
 
 # Normal Operation
 
-Once you have added to the tags file, you should see something like this when you run **e621dl**:
+Once you have added at least one group to the tags file, you should see something similar to this when you run **e621dl**:
 
 ```
-e621dl      INFO     Running e621dl version 2.5.2b -- Forked from 2.4.6
-e621dl      INFO     e621dl was last run on 2016-11-26
-e621dl      INFO     Checking for new uploads tagged: cat
-e621dl      INFO     3 new (7 found, 0 missing tags, 0 blacklisted, 4 downloaded, 0 cached)
+e621dl      INFO     Running e621dl version 2.5.2b -- Forked from 2.4.6.
+e621dl      INFO     e621dl was last run on 2016-11-27.
 
-e621dl      INFO     starting download of 3 files
+e621dl      INFO     Checking for new posts tagged: cat.
+e621dl      INFO     4 new (8 found, 1 missing tags, 1 blacklisted, 2 downloaded, 0 cached)
+
+e621dl      INFO     Starting download of 4 files.
 
 Downloading:        [###################################] 100.00% Done...
 
-e621dl      INFO     successfully downloaded 3 files
-e621dl      INFO     last run updated to 2016-11-27
+
+e621dl      INFO     Successfully downloaded 4 files.
+e621dl      INFO     Last run updated to 2016-11-26.
 ```
 
-There's actually quite a bit of information here. Since last time **e621dl** was run (2014-06-26) there have been 7 uploads that match the search "cat". 4 of these have been downloaded previously, so they will be skipped. But 3 are new, and they are downloaded. Once they have been downloaded, **e621dl** updates its last run date to the current date (2014-06-27).
+There is quite a bit of information here. Since last time **e621dl** was run on 2014-06-27, there have been 8 uploads that match the search "cat". One post did not contain every tag which we specified. This is because e621 will only accept 5 initial tags and any additional tags are checked by e621dl. 1 post has a tag that was in our blacklist, so it will be skipped. 2 posts have already been downloaded in a previous run, so they will also be skipped. The 4 remaining posts will be downloaded and added the downloads folder. Once they have been downloaded, **e621dl** updates its last run date to the day before it was run, 2014-11-26, and is ready for its next use.
 
 ## Automation of **e621dl**
 
-Savvy users should realize at this point that they could simply schedule **e621dl** to run nightly in the wee hours of the morning, and their local collection will always be up-to-date... However, how you do this is completely dependent on your platform and outside the scope of this guide.
+It should be recognized that **e621dl**, as a script, can be scheduled to run nightly, keeping the user's local collections always up-to-date, however, the methods for doing this are dependent on the user's platform, and are outside the scope of this guide.
 
 # Feedback and Feature Requests
 
-If you have any ideas for how things might work better, or about features you'd like to see in the future, open an issue and I will try to read it as soon as possible.
+If you have any ideas on how to make this script run better, or for features you would like to see in the future, open a detailed issue and I will try to read it as soon as possible.
 
 # Donations
 

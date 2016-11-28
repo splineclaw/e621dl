@@ -19,16 +19,15 @@ CONFIG_FILE = {
 TAG_FILE = '''# NOTE: All lines in this file that begin with # are treated as comments and are
 # ignored by e621dl.
 #
-# Add any tags or meta-tags for posts you would like to download to this file.
-#
-#
-# Each line in this file will be treated as a separate group, and a new folder inside the downloads
-# directory will be created for each group.
+# Add any tags or meta-tags for posts you would like to download to this file. Each line in this 
+# file will be treated as a separate group, and a new folder inside the downloads directory will be
+# created for each group.
 #
 # IF YOUR GROUP CONTAINS MORE THAN 5 TAGS, PLEASE CHECK THE E621 WIKI AND MAKE SURE TO CONVERT TAG
 # ALIASES. DUE TO THE NATURE OF E621'S SEARCH FUNCTION, ONLY 5 TAGS CAN BE CONVERTED AUTOMATICALLY.
-# ALL ADITIONAL TAGS ARE MANUALLY CHECKED BY E621DL. ANOTHER SIDE EFFECT OF THIS WORKAROUND IS THAT
-# YOU MAY ONLY USE UP TO 5 META-TAGS PER GROUP, AND THEY MUST BE THE FIRST 5 ITEMS ON THE LINE.
+# ALL ADDITIONAL TAGS ARE MANUALLY CHECKED BY E621DL. IN THE FUTURE, A LOCAL ALIAS CONVERTER MAY BE
+# ADDED SO THAT YOU DO NOT NEED TO CONVERT THEM MANUALLY. ANOTHER SIDE EFFECT OF THIS WORKAROUND IS
+# THAT YOU MAY ONLY USE UP TO 5 META-TAGS PER GROUP, AND THEY MUST BE THE FIRST 5 ITEMS ON THE LINE.
 #
 '''
 
@@ -38,8 +37,9 @@ BLACKLIST_FILE = '''# NOTE: All lines in this file that begin with # are treated
 # Add any tags for posts you would like to AVOID downloading to this file. Meta-tags will currently
 # break the script, so do not use them in this file.
 #
-# PLEASE CHECK THE E621 WIKI AND MAKE SURE TO CONVERT TAG ALIASES. THIS SCRIPT, CURRENTLY, CAN
-# ONLY BLACKLIST OFFICIAL TAGS.
+# THIS SCRIPT, CURRENTLY, CAN ONLY BLACKLIST OFFICIAL TAGS. IN THE FUTURE, A LOCAL ALIAS CONVERTER
+# MAY BE ADDED SO THAT YOU DO NOT NEED TO CONVERT THEM MANUALLY. UNTIL THEN, BE SURE TO CHECK YOUR
+# TAGS AGAINST THE E621 WIKI TO AVOID SEEING ANY CONTENT YOU DO NOT WANT TO.
 #
 # Give each tag its own new line.
 #
