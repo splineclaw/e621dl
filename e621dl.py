@@ -57,6 +57,11 @@ if __name__ == '__main__':
     EARLY_TERMINATE |= not os.path.isfile(BLACKLIST_FILE)
     BLACKLIST = support.get_blacklistfile(BLACKLIST_FILE)
 
+    ALIASED_BLACKLIST = []
+    for tag in BLACKLIST:
+        ALIASED_BLACKLIST.append(e621_api.get_alias(tag))
+        print e621_api.get_alias(tag)
+
     # open the cache (this can't really fail; just creates a new blank one)
     CACHE = support.get_cache(CONFIG['cache_name'], CONFIG['cache_size'])
 
@@ -102,7 +107,7 @@ if __name__ == '__main__':
 
             for i in all_tags:
                 if i not in search_tags.split():
-                    extra_tags.append(i)
+                    extra_tags.append(e621_api.get_alias(i))
 
         else:
             search_tags = line
@@ -143,7 +148,7 @@ if __name__ == '__main__':
                     LOG.debug('%s skipped (missing a requested tag)')
 
                 # skip if blacklisted
-                elif list(set(BLACKLIST) & set(currentTags)) != []:
+                elif list(set(ALIASED_BLACKLIST) & set(currentTags)) != []:
                     links_blacklisted += 1
                     LOG.debug('%s skipped (contains a blacklisted tag)')
 

@@ -23,12 +23,16 @@ TAG_FILE = '''# NOTE: All lines in this file that begin with # are treated as co
 # file will be treated as a separate group, and a new folder inside the downloads directory will be
 # created for each group.
 #
-# IF YOUR GROUP CONTAINS MORE THAN 5 TAGS, PLEASE CHECK THE E621 TAG LIST
-# (https://e621.net/tag_alias/) AND MAKE SURE TO CONVERT TAG ALIASES. DUE TO THE NATURE OF E621'S
-# SEARCH FUNCTION, ONLY 5 TAGS CAN BE CONVERTED AUTOMATICALLY. ALL ADDITIONAL TAGS ARE MANUALLY
-# CHECKED BY E621DL. IN THE FUTURE, A LOCAL ALIAS CONVERTER MAY BE ADDED SO THAT YOU DO NOT NEED TO
-# CONVERT THEM MANUALLY. ANOTHER SIDE EFFECT OF THIS WORKAROUND IS THAT YOU MAY ONLY USE UP TO 5
-# META-TAGS PER GROUP, AND THEY MUST BE THE FIRST 5 ITEMS ON THE LINE.
+# If your group contains more than 5 tags, e621dl will try to automatically convert all additional
+# tags to their proper alias and filter posts found from the first 5 tags. Until this feature is
+# more thoroughly developed, you may need to consult the e621 tag list
+# (https://e621.net/tag_alias/) and manually convert aliases that do not get converted
+# automatically. Otherwise, it would be greatly appreciated that you test the automatic tag
+# conversion and report any issues.
+#
+# One side effect of the workaround used to search infinite tags is that you may only use up to 5
+# meta-tags per group, and they must be the first 5 items on the 
+# line.
 #
 '''
 
@@ -38,10 +42,11 @@ BLACKLIST_FILE = '''# NOTE: All lines in this file that begin with # are treated
 # Add any tags for posts you would like to AVOID downloading to this file. Meta-tags will currently
 # break the script, so do not use them in this file.
 #
-# THIS SCRIPT, CURRENTLY, CAN ONLY BLACKLIST OFFICIAL TAGS. IN THE FUTURE, A LOCAL ALIAS CONVERTER
-# MAY BE ADDED SO THAT YOU DO NOT NEED TO CONVERT THEM MANUALLY. UNTIL THEN, BE SURE TO CHECK YOUR
-# TAGS AGAINST THE E621 TAG LIST (https://e621.net/tag_alias/) TO AVOID SEEING ANY CONTENT YOU DO
-# NOT WANT TO.
+# e621dl will try to automatically convert all tags to their proper aliases. Until this feature is
+# more thoroughly developed, you may want to check your tags against the e621 tag list
+# (https://e621.net/tag_alias/) and manually convert any tags for content you absolutely do not
+# want to see. Otherwise, it would be greatly appreciated that you test the automatic tag
+# conversion and report any issues.
 #
 # Give each tag its own new line.
 #

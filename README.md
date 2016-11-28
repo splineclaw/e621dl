@@ -23,7 +23,6 @@ Once it knows these things, it goes through the searches one by one, and downloa
 - Open the terminal/command line in the directory you installed e621dl, and run `e621dl.py`
 
   - You may need to run the command as `python e621dl.py` if python is not in your path.
-  - **Do not** double-click on `e621dl.py`. You **must** run it from the command line.
 
 ## First-Time Run
 
@@ -46,13 +45,15 @@ These errors are normal behavior for a first run, and should not raise any alarm
 
 Add any tags or meta-tags for posts you would like to download to this file. Each line in this file will be treated as a separate group, and a new folder inside the downloads directory will be created for each group.
 
-_If your group contains more than 5 tags, please check the [e621 tag list](https://e621.net/tag_alias/) and make sure to convert tag aliases. Due to the nature of e621's search function, only 5 tags can be converted automatically. All additional tags are manually checked by e621dl. In the future, an alias converter may be added so that you do not need to convert them manually. Another side effect of this workaround is that you may only use up to 5 meta-tags per group, and they must be the first 5 items on the line._
+_If your group contains more than 5 tags, **e621dl** will try to automatically convert all additional tags to their proper alias and filter posts found from the first 5 tags. Until this feature is more thoroughly developed, you may need to consult the [e621 tag list](https://e621.net/tag_alias/) and manually convert aliases that do not get converted automatically. Otherwise, it would be greatly appreciated that you test the automatic tag conversion and report any issues._
+
+One side effect of the workaround used to search infinite tags is that you may only use up to 5 meta-tags per group, and they must be the first 5 items on the line.
 
 ## [Optional] Add tags to the blacklist file.
 
 Add any tags for posts you would like to avoid downloading to this file. Meta-tags will currently break the script, as they are not filtered out, so do not use them in this file.
 
-_This script, currently, can only blacklist official tags. In the future, an alias converter may be added so that you do not need to convert them manually. Until then, be sure to check your tags against the [e621 tag list](https://e621.net/tag_alias/) to avoid seeing any content you do not want to._
+_**e621dl** will try to automatically convert all tags to their proper aliases. Until this feature is more thoroughly developed, you may want to check your tags against the [e621 tag list](https://e621.net/tag_alias/) and manually convert any tags for content you absolutely do not want to see. Otherwise, it would be greatly appreciated that you test the automatic tag conversion and report any issues._
 
 Give each tag its own new line.
 
@@ -119,4 +120,4 @@ Since this script was initially written by @wwyaiykycnf I will leave their donat
 
 If you've benefitted from this _free_ project, why not [buy me something on Amazon?](http://amzn.com/w/20RZIUHXLO6R4) There's tons of cheap bullshit on there I would totally get a kick out of owning.
 
-Alternatively, drop me an email at wwyaiykycnf+features@gmail.com and say thanks. Your support (monetary or not) provides me the motivation to keep fixing bugs and adding new features, so thanks for thinking of me!
+Alternatively, drop me an email at wwyaiykycnf+features@gmail.com and say thanks. Your support (monetary or not) provides me the motivation to keep fixing bugs and adding new features, so thanks for thinking of me! ng of me! ng of me! ng of me! ng of me!
