@@ -26,9 +26,9 @@ def get_verbosity_level():
     # add mutually exclusive options verbose/quiet
     verbosity = parser.add_mutually_exclusive_group(required=False)
     verbosity.add_argument('-v', '--verbose', action='store_true',
-                           help='display debug information while running')
+                           help='Display full debug information while running.')
     verbosity.add_argument('-q', '--quiet', action='store_true',
-                           help='display no output while running (except errors)')
+                           help='Display no output while running, except errors.')
 
     # parse using argparser
     args = parser.parse_args()
@@ -42,16 +42,16 @@ def get_verbosity_level():
 
 
 def make_default_configfile(filename):
-    log = logging.getLogger('configfile')
-    log.error('new default file created: ' + filename)
-    log.error('verify this file and re-run the program')
+    log = logging.getLogger('config')
+    log.error('New default file created: ' + filename + '.')
+    log.error('Verify this file, then re-run the program.')
     with open(filename, 'w') as outfile:
         json.dump(default.CONFIG_FILE, outfile, indent=4, sort_keys=True,)
     return default.CONFIG_FILE
 
 
 def get_configfile(filename):
-    log = logging.getLogger('configfile')
+    log = logging.getLogger('config')
     if not os.path.isfile(filename):
         return make_default_configfile(filename)
     else:
@@ -61,16 +61,16 @@ def get_configfile(filename):
 
 
 def make_default_tagfile(filename):
-    log = logging.getLogger('tagfile')
+    log = logging.getLogger('tags')
     with open(filename, 'w') as outfile:
         outfile.write(default.TAG_FILE)
 
-    log.error('new default file created: ' + filename)
-    log.error('add to this file and re-run the program')
+    log.error('New default file created: ' + filename + '.')
+    log.error('Add to this file, then re-run the program.')
 
 
 def get_tagfile(filename):
-    log = logging.getLogger('tag_file')
+    log = logging.getLogger('tags')
 
     if not os.path.isfile(filename):
         make_default_tagfile(filename)
@@ -88,16 +88,15 @@ def get_tagfile(filename):
 
 
 def make_default_blacklistfile(filename):
-    log = logging.getLogger('blacklistfile')
+    log = logging.getLogger('blacklist')
     with open(filename, 'w') as outfile:
         outfile.write(default.BLACKLIST_FILE)
 
-    log.error('new default file created: ' + filename)
-    log.error('add to this file and re-run the program')
+    log.error('New default file created: ' + filename + '.')
 
 
 def get_blacklistfile(filename):
-    log = logging.getLogger('blacklist_file')
+    log = logging.getLogger('blacklist')
 
     if not os.path.isfile(filename):
         make_default_blacklistfile(filename)
@@ -153,7 +152,7 @@ def safe_filename(tag_line, item, config_dict):
 
 def validate_tagfile(tags, filename):
     if len(tags) == 0:
-        log = logging.getLogger('tag_file')
+        log = logging.getLogger('tags')
         log.error('no tags found in %s', filename)
         log.error('add lines to this file and re-run program')
         return False
@@ -161,7 +160,7 @@ def validate_tagfile(tags, filename):
 
 
 def validate_config(c):
-    log = logging.getLogger('config_file')
+    log = logging.getLogger('config')
     try:
         assert type(c['create_subdirectories']) is BooleanType, \
             "'create_subdirectories' must be set to true or false"
@@ -180,12 +179,13 @@ def validate_config(c):
             "'file_name' must be 'id' or 'md5'"
 
         if not os.path.exists(c['download_directory']):
-            log.info('empty download directory created')
+            log.info('Download directory created.')
             os.makedirs(c['download_directory'])
 
         return True
 
     except AssertionError as ex_msg:
-        log.error("could not parse config file")
+        log.error(
+            "Could not parse config file. Please fix it manually, or delete the file to generate a fresh copy.")
         log.error(ex_msg)
         return False

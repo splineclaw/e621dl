@@ -36,7 +36,7 @@ if __name__ == '__main__':
     LOG = logging.getLogger('e621dl')
 
     # report current version
-    LOG.info('running e621dl version %s', VERSION)
+    LOG.info('Running e621dl version %s.', VERSION)
 
     # this flag will be set to true if a fatal error occurs in pre-update
     EARLY_TERMINATE = False
@@ -66,7 +66,7 @@ if __name__ == '__main__':
 
     # exit before updating if any errors occurred in pre-update
     if EARLY_TERMINATE:
-        LOG.error('error(s) encountered during initialization, see above')
+        LOG.error('Error(s) encountered during initialization, see above.')
         sys.exit(-1)
 
 ##############################################################################
@@ -76,12 +76,12 @@ if __name__ == '__main__':
 #       - if the file has not previously been downloaded, download it
 # - count number of downloads for reporting in post-update
 ##############################################################################
-    LOG.info("e621dl was last run on %s\n", CONFIG['last_run'])
+    LOG.info("e621dl was last run on %s.\n", CONFIG['last_run'])
 
     URL_AND_NAME_LIST = []
 
     for line in TAGS:
-        LOG.info("Checking for new uploads tagged: %s", line)
+        LOG.info("Checking for new posts tagged: %s.", line)
 
         # prepare to start accumulating list of download links for line
         accumulating = True
@@ -168,17 +168,17 @@ if __name__ == '__main__':
                     # push to cache, write cache to disk
                     CACHE.push(item.md5)
 
-            LOG.debug('update for %s completed\n', line)
+            LOG.debug('Update for group %s completed.\n', line)
             LOG.info('%d new (%d found, %d missing tags, %d blacklisted, %d downloaded, %d cached)\n',
                      will_download, len(
                          potential_downloads), links_missing_tags, links_blacklisted,
                      links_on_disk, links_in_cache)
 
     if URL_AND_NAME_LIST:
-        LOG.info('starting download of %d files', len(URL_AND_NAME_LIST))
+        LOG.info('Starting download of %d files.', len(URL_AND_NAME_LIST))
         multi_download(URL_AND_NAME_LIST, CONFIG['parallel_downloads'])
     else:
-        LOG.info('nothing to download')
+        LOG.info('Nothing to download.')
 
 
 ##############################################################################
@@ -189,17 +189,16 @@ if __name__ == '__main__':
 ##############################################################################
     #pickle.dump(CACHE, open('.cache', 'wb'), pickle.HIGHEST_PROTOCOL)
     if URL_AND_NAME_LIST:
-        LOG.info('successfully downloaded %d files', len(URL_AND_NAME_LIST))
+        LOG.info('Successfully downloaded %d files.', len(URL_AND_NAME_LIST))
 
     YESTERDAY = datetime.date.fromordinal(
         datetime.date.today().toordinal() - 1)
     CONFIG['last_run'] = YESTERDAY.strftime(default.DATETIME_FMT)
-    #CONFIG['last_run'] = '1776-07-04'
 
     with open(CONFIG_FILE, 'wb') as outfile:
         json.dump(CONFIG, outfile, indent=4,
                   sort_keys=True, ensure_ascii=False)
 
-    LOG.info('last run updated to %s', CONFIG['last_run'])
+    LOG.info('Last run updated to %s.', CONFIG['last_run'])
 
     sys.exit(0)
