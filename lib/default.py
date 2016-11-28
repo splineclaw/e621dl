@@ -30,17 +30,18 @@ TAG_FILE = '''# NOTE: All lines in this file that begin with # are treated as co
 # automatically. Otherwise, it would be greatly appreciated that you test the automatic tag
 # conversion and report any issues.
 #
-# One side effect of the workaround used to search infinite tags is that you may only use up to 5
-# meta-tags `:`, negative tags `-`, operational tags `~`, or wild tags `*` per group, and they must
-# be the first 5 items on the line.
-#
+# One side effect of the workaround used to search an unlimited number tags is that you may only
+# use up to 5 meta tags `:`, negative tags `-`, operational tags `~`, or wildcard tags `*` per
+# group, and they must be the first 5 items in the group. See the e621 cheatsheet
+# (https://e621.net/help/show/cheatsheet) for more information on these special types of tags.
 '''
 
 BLACKLIST_FILE = '''# NOTE: All lines in this file that begin with # are treated as comments and
 # are ignored by e621dl.
 #
-# Add any tags for posts you would like to AVOID downloading to this file. Meta-tags will currently
-# break the script, so do not use them in this file.
+# Add any tags for posts you would like to avoid downloading to this file. Meta tags `:`, negative
+# tags `:`, operational tags `~`, and wildcard tags `*` will currently break the script, as they
+# are not filtered out of the blacklist, so do not use them in this file.
 #
 # e621dl will try to automatically convert all tags to their proper aliases. Until this feature is
 # more thoroughly developed, you may want to check your tags against the e621 tag list
@@ -49,5 +50,4 @@ BLACKLIST_FILE = '''# NOTE: All lines in this file that begin with # are treated
 # conversion and report any issues.
 #
 # Give each tag its own new line.
-#
 '''
