@@ -31,8 +31,8 @@ TAG_FILE = '''# NOTE: All lines in this file that begin with # are treated as co
 # conversion and report any issues.
 #
 # One side effect of the workaround used to search infinite tags is that you may only use up to 5
-# meta-tags per group, and they must be the first 5 items on the 
-# line.
+# meta-tags `:`, negative tags `-`, operational tags `~`, or wild tags `*` per group, and they must
+# be the first 5 items on the line.
 #
 '''
 

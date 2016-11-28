@@ -57,11 +57,6 @@ if __name__ == '__main__':
     EARLY_TERMINATE |= not os.path.isfile(BLACKLIST_FILE)
     BLACKLIST = support.get_blacklistfile(BLACKLIST_FILE)
 
-    ALIASED_BLACKLIST = []
-    for tag in BLACKLIST:
-        ALIASED_BLACKLIST.append(e621_api.get_alias(tag))
-        print e621_api.get_alias(tag)
-
     # open the cache (this can't really fail; just creates a new blank one)
     CACHE = support.get_cache(CONFIG['cache_name'], CONFIG['cache_size'])
 
@@ -73,6 +68,12 @@ if __name__ == '__main__':
     if EARLY_TERMINATE:
         LOG.error('Error(s) encountered during initialization, see above.')
         sys.exit(-1)
+
+    # alias the blacklisted
+    ALIASED_BLACKLIST = []
+    for tag in BLACKLIST:
+        ALIASED_BLACKLIST.append(e621_api.get_alias(tag))
+        print e621_api.get_alias(tag)
 
 ##############################################################################
 # UPDATE
@@ -105,13 +106,12 @@ if __name__ == '__main__':
             search_tags = '%s %s %s %s %s' % (all_tags[0], all_tags[1], all_tags[2], all_tags[3],
                                               all_tags[4])
 
-            for i in all_tags:
-                if i not in search_tags.split():
-                    extra_tags.append(e621_api.get_alias(i))
+            for tag in all_tags:
+                if tag not in search_tags.split():
+                    extra_tags.append(e621_api.get_alias(tag))
 
         else:
             search_tags = line
-            extra_tags = line.split()
 
         while accumulating:
             links_found = e621_api.get_posts(search_tags, CONFIG['last_run'],
@@ -143,7 +143,7 @@ if __name__ == '__main__':
                 currentTags = item.tags.split()
 
                 # skip if missing a tag
-                if list(set(extra_tags) & set(currentTags)) == []:
+                if len(all_tags) > 5 and list(set(extra_tags) & set(currentTags)) == []:
                     links_missing_tags += 1
                     LOG.debug('%s skipped (missing a requested tag)')
 

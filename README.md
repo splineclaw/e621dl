@@ -47,7 +47,7 @@ Add any tags or meta-tags for posts you would like to download to this file. Eac
 
 _If your group contains more than 5 tags, **e621dl** will try to automatically convert all additional tags to their proper alias and filter posts found from the first 5 tags. Until this feature is more thoroughly developed, you may need to consult the [e621 tag list](https://e621.net/tag_alias/) and manually convert aliases that do not get converted automatically. Otherwise, it would be greatly appreciated that you test the automatic tag conversion and report any issues._
 
-One side effect of the workaround used to search infinite tags is that you may only use up to 5 meta-tags per group, and they must be the first 5 items on the line.
+One side effect of the workaround used to search infinite tags is that you may only use up to 5 meta-tags `:`, negative tags `-`, operational tags `~`, or wild tags `*` per group, and they must be the first 5 items on the line.
 
 ## [Optional] Add tags to the blacklist file.
 
