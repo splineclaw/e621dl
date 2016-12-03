@@ -1,36 +1,25 @@
 #!/usr/bin/env python
 
+from urllib import FancyURLopener
 import argparse
 import logging
-import json
-import FixedFifo
-import default
-import re
-import cPickle as pickle
+import constants
+import ConfigParser
 import os
-from types import IntType, BooleanType
-from urllib import FancyURLopener
-
 
 class SpoofOpen(FancyURLopener):
-    version = 'Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.8.0.12) Gecko/20070731 Ubuntu/dapper-security Firefox/1.5.0.12'
+    version = 'Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.8.0.12) ' + \
+        'Gecko/20070731 Ubuntu/dapper-security Firefox/1.5.0.12'
 
+def get_verbosity():
+    parser = argparse.ArgumentParser(prog = 'e621dl', description = 'An automated e621 downloader.')
 
-def get_verbosity_level():
+    verbosity = parser.add_mutually_exclusive_group(required = False)
+    verbosity.add_argument('-v', '--verbose', action = 'store_true', help = 'Display full debug \
+        information while running.')
+    verbosity.add_argument('-q', '--quiet', action = 'store_true', help = 'Display no output while \
+        running, except for errors.')
 
-    # build the parser
-    parser = argparse.ArgumentParser(prog='e621dl',
-                                     description='automated e621 downloader.\
-        add artists/tags to tags.txt and run!')
-
-    # add mutually exclusive options verbose/quiet
-    verbosity = parser.add_mutually_exclusive_group(required=False)
-    verbosity.add_argument('-v', '--verbose', action='store_true',
-                           help='Display full debug information while running.')
-    verbosity.add_argument('-q', '--quiet', action='store_true',
-                           help='Display no output while running, except errors.')
-
-    # parse using argparser
     args = parser.parse_args()
 
     if args.quiet:
@@ -40,152 +29,51 @@ def get_verbosity_level():
     else:
         return logging.INFO
 
-
-def make_default_configfile(filename):
+def make_config(filename):
     log = logging.getLogger('config')
-    log.error('New default file created: ' + filename + '.')
-    log.error('Verify this file, then re-run the program.')
+
     with open(filename, 'w') as outfile:
-        json.dump(default.CONFIG_FILE, outfile, indent=4, sort_keys=True,)
-    return default.CONFIG_FILE
+            outfile.write(constants.CONFIG_FILE)
+            log.info('New default file created: \"' + filename + '\".')
 
-
-def get_configfile(filename):
+def get_config(filename):
     log = logging.getLogger('config')
+    config = ConfigParser.ConfigParser()
+
     if not os.path.isfile(filename):
-        return make_default_configfile(filename)
+        log.error('No config file found.')
+        return make_config(filename)
     else:
         with open(filename, 'r') as infile:
-            log.debug('opened ' + filename)
-            return json.load(infile)
+            config.readfp(infile)
+            return config
 
-
-def make_default_tagfile(filename):
-    log = logging.getLogger('tags')
-    with open(filename, 'w') as outfile:
-        outfile.write(default.TAG_FILE)
-
-    log.error('New default file created: ' + filename + '.')
-    log.error('Add to this file, then re-run the program.')
-
-
-def get_tagfile(filename):
+def validate_tags(config):
     log = logging.getLogger('tags')
 
-    if not os.path.isfile(filename):
-        make_default_tagfile(filename)
-        return default.TAG_FILE
-    else:
-        # read out all lines not starting with #
-        tag_list = []
-        for line in open(filename):
-            raw_line = line.strip()
-            if not raw_line.startswith("#") and raw_line != '':
-                tag_list.append(raw_line)
+    sections = 0
+    for section in config.sections():
+        sections += 1
 
-        log.debug('opened %s and read %d items', filename, len(tag_list))
-        return tag_list
-
-
-def make_default_blacklistfile(filename):
-    log = logging.getLogger('blacklist')
-    with open(filename, 'w') as outfile:
-        outfile.write(default.BLACKLIST_FILE)
-
-    log.error('New default file created: ' + filename + '.')
-
-
-def get_blacklistfile(filename):
-    log = logging.getLogger('blacklist')
-
-    if not os.path.isfile(filename):
-        make_default_blacklistfile(filename)
-        return default.BLACKLIST_FILE
-    else:
-        # read out all lines not starting with #
-        blacklist = []
-        for line in open(filename):
-            raw_line = line.strip()
-            if not raw_line.startswith("#") and raw_line != '':
-                blacklist.append(raw_line)
-
-        log.debug('opened %s and read %d items', filename, len(blacklist))
-        return blacklist
-
-
-def get_cache(filename, size):
-    log = logging.getLogger('cache')
-    try:
-        cache = pickle.load(open(filename, 'rb'))
-        cache.resize(int(size))
-        log.debug('loaded existing cache')
-        log.debug('capacity = %d (of %d)', len(cache), cache.size())
-        log.debug('size on disk = %f kb', os.path.getsize(filename) / 1024)
-
-    except IOError:
-        cache = FixedFifo.FixedFifo(size)
-        log.debug('new blank cache created. size = %d', size)
-
-    return cache
-
-
-def sub_char(char):
-    illegal = ['\\', '/', ':', '*', '?', '"', '<', '>', '|', ' ']
-    return '_' if char in illegal else char
-
-
-def safe_filename(tag_line, item, config_dict):
-    safe_tagline = ''.join([sub_char(c) for c in tag_line])
-
-    name = str(getattr(item, config_dict['file_name']))
-    if config_dict['create_subdirectories'] == True:
-        if not os.path.isdir(config_dict['download_directory'] + safe_tagline.decode('utf-8')):
-            os.makedirs(config_dict['download_directory'] + safe_tagline)
-        safe_filename = safe_tagline + '/' + name + '.' + item.ext
-
-    else:
-        safe_filename = safe_tagline.decode(
-            'utf-8') + '_' + name + '.' + item.ext.decode('utf-8')
-
-    return safe_filename
-
-
-def validate_tagfile(tags, filename):
-    if len(tags) == 0:
-        log = logging.getLogger('tags')
-        log.error('no tags found in %s', filename)
-        log.error('add lines to this file and re-run program')
-        return False
-    return True
-
-
-def validate_config(c):
-    log = logging.getLogger('config')
-    try:
-        assert type(c['create_subdirectories']) is BooleanType, \
-            "'create_subdirectories' must be set to true or false"
-        assert c['parallel_downloads'] in range(1, 17),\
-            "'parallel_downloads' must be a number from 1 to 16 (no quotes)"
-
-        assert type(c['cache_size']) is IntType and \
-            c['cache_size'] > 0, \
-            "'cache_size' must be a number greater than 0 (no quotes)"
-
-        assert bool(re.match(r'\d{4}-\d{2}-\d{2}', c['last_run'])) == True, \
-            "'last_run' format must be: \"YYYY-MM-DD\" (quotes required"
-
-        assert c['file_name'] == "id" or \
-            c['file_name'] == "md5", \
-            "'file_name' must be 'id' or 'md5'"
-
-        if not os.path.exists(c['download_directory']):
-            log.info('Download directory created.')
-            os.makedirs(c['download_directory'])
-
+    if sections < 3:
+        log.error('Please add at least one tag group to \"config.ini\".')
         return True
-
-    except AssertionError as ex_msg:
-        log.error(
-            "Could not parse config file. Please fix it manually, or delete the file to generate a fresh copy.")
-        log.error(ex_msg)
+    else:
         return False
+
+
+
+def substitute_illegals(char):
+    illegals = ['\\', '/', ':', '*', '?', '\"', '<', '>', '|', ' ']
+    return '_' if char in illegals else char
+
+def make_filename(directory_name, post, config):
+    safe_directory = ''.join([substitute_illegals(char) for char in directory_name])
+    name = str(getattr(post, config.get('Settings', 'file_name')))
+
+    if not os.path.isdir('downloads/' + safe_directory.decode('utf-8')):
+        os.makedirs('downloads/' + safe_directory)
+
+    filename = 'downloads/' + safe_directory + '/' + name + '.' + post.ext
+
+    return filename

@@ -1,6 +1,4 @@
 .DS_Store
-.cache
-*.txt
+*.ini
 *.pyc
-*.bat
 downloads/

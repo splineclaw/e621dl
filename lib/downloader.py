@@ -1,90 +1,69 @@
 #!/usr/bin/env python
 
+from support import SpoofOpen
 import logging
-import sys
-from urllib import FancyURLopener
-from multiprocessing import Pool, Manager, Process
 from time import sleep
+from multiprocessing import Pool, Manager, Process
 from itertools import repeat
 
-
-class SpoofOpen(FancyURLopener):
-    version = 'Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.8.0.12) ' + \
-        'Gecko/20070731 Ubuntu/dapper-security Firefox/1.5.0.12'
-
-
 def update_progress(progress):
-    barLength = 35  # Modify this to change the length of the progress bar
-    status = ""
+    BAR_LENGTH = 36
+    status = ''
     if isinstance(progress, int):
         progress = float(progress)
-    if not isinstance(progress, float):
-        progress = 0
-        status = "error: progress var must be float\r"
     if progress < 0:
         progress = 0
-        status = "Halt...        \r"
+        status = '-- Stopped.\n'
     if progress >= 1:
         progress = 1
-        status = "Done...        \r"
-    block = int(round(barLength * progress))
-    text = "\rDownloading:        [{0}] {1:6.2f}% {2}".format(
-        ">" * block + " " * (barLength - block), progress * 100, status)
-    sys.stdout.write(text)
-    sys.stdout.flush()
+        status = '-- Done.\n'
+    completed = int(round(BAR_LENGTH * progress))
+    bar = '\rDownloading          [{0}] {1:6.2f}% {2}'.format('>' * completed +
+        ' ' * (BAR_LENGTH - completed), progress * 100, status)
+    print bar,
 
+def download_monitor(managedList, totalItems):
+    while True:
+        progress = float(len(managedList)) / float(totalItems)
+        update_progress(progress)
+        if totalItems == len(managedList):
+            return
+        sleep (0.2)
 
-def single_download(args):
-    url_and_name, m_list = args
-    log = logging.getLogger('dl_thread')
-    url, filename = url_and_name
+def single_download(zippedArgs):
+    urlNameList, managedList = zippedArgs
+    url, filename = urlNameList
 
     spoof = SpoofOpen()
+
     try:
         with open(filename, 'wb') as dest:
             source = spoof.open(url)
             dest.write(source.read())
-        log.debug(filename)
-        m_list.append(filename)
+
+        log = logging.getLogger('single_dl')
+        log.debug('Downloading \"' + filename + '\".')
+        managedList.append(filename)
 
     except KeyboardInterrupt, e:
         pass
 
-
-def download_monitor(args):
-    managed_list, total_items = args
-    print ''
-    while True:
-        progress = float(len(managed_list)) / float(total_items)
-        update_progress(progress)
-        if total_items == len(managed_list):
-            return
-        sleep(0.2)
-
-
-def multi_download(url_and_name_list, num_threads=8):
-    ''' accepts list of tuples, where t[0] = url and t[1] = filename '''
+def multi_download(urlNameList, numThreads):
     manager = Manager()
+    managedList = manager.list()
 
-    # pylint: disable=no-member
-    m_list = manager.list()
-    # pylint: enable=no-member
     log = logging.getLogger('multi_dl')
-    log.debug('starting pool with ' + str(num_threads) + ' workers')
+    log.debug('Staring download pool of ' + str(numThreads) + ' workers.')
 
-    monitor_thread = Process(target=download_monitor,
-                             args=((m_list, len(url_and_name_list)),))
+    monitor = Process(target = download_monitor, args = ((managedList, len(urlNameList))))
+    monitor.start()
 
-    monitor_thread.start()
-    workers = Pool(processes=num_threads)
-    work = workers.map_async(single_download,
-                             zip(url_and_name_list, repeat(m_list)))
+    workers = Pool(processes = numThreads)
+    work = workers.map_async(single_download, zip(urlNameList, repeat(managedList)))
 
-    # this hack makes the async_map respond to ^C interrupts
     try:
         work.get(0xFFFF)
-        monitor_thread.join()
-        sys.stdout.write('\n\n')
+        monitor.join()
+
     except KeyboardInterrupt:
-        print 'parent received control-c'
         exit()
