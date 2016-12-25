@@ -42,48 +42,43 @@ e621dl      ERROR    Error(s) encountered during initialization, see above.
 
 These errors are normal behavior for a first run, and should not raise any alarm. **e621dl** is telling you that it was unable to find the _config_, _tags_, or _blacklist_ files, nor the _downloads_ folder, so it created them.
 
-## Add searches to the tags file.
+## Add searches to the config file.
 
-Add any tags or meta-tags for posts you would like to download to this file. Each line in this file will be treated as a separate group, and a new folder inside the downloads directory will be created for each group.
+Add any tags or meta-tags for posts you would like to download their own sections in the `config.ini` file an example is provided for you. Each search will have its own directory inside the downloads folder.
+
+Commas should be used to separate tags.
 
 _If your group contains more than 5 tags, **e621dl** will try to automatically convert all additional tags to their proper alias and filter posts found from the first 5 tags. Until this feature is more thoroughly developed, you may need to consult the [e621 tag list](https://e621.net/tag_alias/) and manually convert aliases that do not get converted automatically. Otherwise, it would be greatly appreciated that you test the automatic tag conversion and report any issues._
 
 One side effect of the workaround used to search an unlimited number tags is that you may only use up to 5 meta tags `:`, negative tags `-`, operational tags `~`, or wildcard tags `*` per group, and they must be the first 5 items in the group. See [the e621 cheatsheet](https://e621.net/help/show/cheatsheet) for more information on these special types of tags.
 
-## [Optional] Add tags to the blacklist file.
+## [Optional] Add blacklisted tags to the config file.
 
-Add any tags for posts you would like to avoid downloading to this file. Meta tags `:`, negative tags `:`, operational tags `~`, and wildcard tags `*` will currently break the script, as they are not filtered out of the blacklist, so do not use them in this file.
+Add any tags for posts you would like to avoid downloading to the blacklist section of the `config.ini` file. Meta tags `:`, negative tags `:`, operational tags `~`, and wildcard tags `*` will currently break the script, as they are not filtered out of the blacklist, so do not use them in this section.
+
+Commas should be used to separate tags.
 
 _**e621dl** will try to automatically convert all tags to their proper aliases. Until this feature is more thoroughly developed, you may want to check your tags against the [e621 tag list](https://e621.net/tag_alias/) and manually convert any tags for content you absolutely do not want to see. Otherwise, it would be greatly appreciated that you test the automatic tag conversion and report any issues._
 
-Give each tag its own new line.
+## [Optional] Modify the settings in the config file.
 
-## [Optional] Modify the config file.
-
-Most users will not need to modify the config file, `config.txt`, but feel free to edit it to your liking after reading the description, and acceptable values for each key. Please respect which values need quotation marks, as the script will fail to run if any are missing.
-
-The quotation marks indicate a _string value_, which python can only interpret _with_ quotation marks, as opposed to a _boolean_ or _integer_ value, which python can only interpret _without_ quotation marks.
+Most users will not need to modify the settings section of the `config.ini` file, but feel free to edit it to your liking after reading the description, and acceptable values for each key.
 
 ### Config Keys, Values, and Descriptions
 
 #### Common Values
 
-Key                   | Quotation marks needed? | Acceptable Values | Description
---------------------- | ----------------------- | ----------------- | ----------------------------------------------------------------------------------
-download_directory    | Yes                     | Valid system path | The path where **e621dl** puts downloaded files. It must must end with `/`.
-create_subdirectories | No                      | `true` or `false` | Create a directory for each group in the tag file.
-file_name             | Yes                     | `md5` or `id`     | The name given to each downloaded file. Can either be the md5 sum or the post id.
-last_run              | Yes                     | Date `YYYY-MM-DD` | The last day **e621dl** was run. You may edit this freely to download older posts.
+Key                   | Acceptable Values | Description
+--------------------- |  -----------------| ----------------------------------------------------------------------------------
+file_name             | `md5` or `id`     | The name given to each downloaded file. Can either be the md5 sum or the post id.
+last_run              |Date `YYYY-MM-DD` | The last day **e621dl** was run. You may edit this freely to download older posts.
 
 #### Advanced Values
 
 _(Most users will not need to change the advanced settings.)_
 
-Key                | Quotation marks needed? | Acceptable Values    | Description
------------------- | ----------------------- | -------------------- | --------------------------------------------------------------------------
-parallel_downloads | No                      | Integer 1 to 16      | The maximum number of simultaneous downloads allowed to be performed.
-cache_name         | Yes                     | Valid system path    | The path of the file that **e621dl** will use to track previous downloads.
-cache_size         | No                      | Any positive integer | The maximum number of items **e621dl** will keep in the cache.
+Key                | Acceptable Values    | Description
+parallel_downloads | Integer 1 to 16      | The maximum number of simultaneous downloads allowed to be performed.
 
 ## Normal Operation
 

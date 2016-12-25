@@ -17,7 +17,7 @@ parallel_downloads = 8
 tags =
 
 # New tag groups can be created by writing the following:
-# [Folder Name]
+# [Directory Name]
 # tags = tag1, tag2, tag3
 #
 # Example:
