@@ -78,6 +78,7 @@ last_run              |Date `YYYY-MM-DD` | The last day **e621dl** was run. You 
 _(Most users will not need to change the advanced settings.)_
 
 Key                | Acceptable Values    | Description
+--------------------- |  -----------------| ----------------------------------------------------------------------------------
 parallel_downloads | Integer 1 to 16      | The maximum number of simultaneous downloads allowed to be performed.
 
 ## Normal Operation
