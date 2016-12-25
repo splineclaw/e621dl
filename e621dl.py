@@ -6,7 +6,7 @@ import ConfigParser
 import os
 import lib.api as api
 from collections import namedtuple
-from lib.downloader import multi_download
+import lib.downloader as downloader
 from multiprocessing import freeze_support
 import datetime
 
@@ -19,6 +19,8 @@ if __name__ == '__main__':
     log.info('Running e621dl version ' + constants.VERSION + '.')
 
     earlyTerminate = False
+
+    earlyTerminate |= not downloader.internet_connected()
 
     earlyTerminate |= not os.path.isfile('config.ini')
     config = support.get_config('config.ini')
@@ -87,7 +89,7 @@ if __name__ == '__main__':
         if len(postList) > 0:
             for i, post in enumerate(postList):
                 log.debug('Item ' + str(i) + '\'s md5 is \"' + post.md5 + '\", and its id is ' +
-                '\"' + str(post.id) + '\".')
+                    '\"' + str(post.id) + '\".')
 
                 filename = support.make_filename(group.directory, post, config)
                 currentTags = post.tags.split()
@@ -109,14 +111,13 @@ if __name__ == '__main__':
                     downloadList.append((post.url, filename))
                     willDownload += 1
 
-            log.info(str(willDownload) + ' new posts will be downloaded. ' + \
-            str(len(postList)) + ' found, ' + str(linksMissingTags) + ' missing tags, ' +
-            str(linksBlacklisted) + ' blacklisted, ' + str(linksOnDisk) + ' previously ' +
-            'downloaded.')
+            log.info(str(willDownload) + ' new files. (' + str(len(postList)) + ' found, ' +
+            str(linksMissingTags) + ' missing tags, ' + str(linksBlacklisted) + ' blacklisted, ' +
+            str(linksOnDisk) + ' duplicate.)')
 
     if downloadList:
         log.info('Starting download of ' + str(len(downloadList)) + ' files.')
-        multi_download(downloadList, config.getint('Settings', 'parallel_downloads'))
+        downloader.multi_download(downloadList, config.getint('Settings', 'parallel_downloads'))
         log.info('Successfully downloaded ' + str(len(downloadList)) + ' files.')
     else:
         log.info('Nothing to download.')

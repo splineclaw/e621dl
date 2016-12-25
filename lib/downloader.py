@@ -5,8 +5,20 @@ import logging
 from time import sleep
 from multiprocessing import Pool, Manager, Process
 from itertools import repeat
+import urllib2
 
-def update_progress(progress):
+def internet_connected():
+    try:
+        urllib2.urlopen('http://www.msftncsi.com/ncsi.txt', timeout = 5)
+        return True
+    except urllib2.URLError as err: pass
+    log = logging.getLogger('internet')
+    log.info('No internet connection detected.')
+    return False
+
+def update_progress(downloaded, total):
+    progress = float(downloaded) / float(total)
+
     BAR_LENGTH = 36
     status = ''
     if isinstance(progress, int):
@@ -18,14 +30,14 @@ def update_progress(progress):
         progress = 1
         status = '-- Done.\n'
     completed = int(round(BAR_LENGTH * progress))
-    bar = '\rDownloading          [{0}] {1:6.2f}% {2}'.format('>' * completed +
-        ' ' * (BAR_LENGTH - completed), progress * 100, status)
+    bar = '\rDownloading          [{}] {:6.2f}% {} {}'.format('>' * completed +
+        ' ' * (BAR_LENGTH - completed), progress * 100, '(' + str(downloaded) + ' / ' + str(total) +
+        ')', status)
     print bar,
 
 def download_monitor(managedList, totalItems):
     while True:
-        progress = float(len(managedList)) / float(totalItems)
-        update_progress(progress)
+        update_progress(len(managedList), totalItems)
         if totalItems == len(managedList):
             return
         sleep (0.2)
