@@ -30,14 +30,11 @@ Once it knows these things, it goes through the searches one by one, and downloa
 The first time you run **e621dl**, you should see something similar to the following:
 
 ```
-e621dl      INFO     Running e621dl version 2.5.2b -- Forked from 2.4.6.
-config      ERROR    New default file created: config.txt.
-config      ERROR    Verify this file, then re-run the program.
-config      INFO     Download directory created.
-tags        ERROR    New default file created: tags.txt.
-tags        ERROR    Add to this file, then re-run the program.
-blacklist   ERROR    New default file created: blacklist.txt.
-e621dl      ERROR    Error(s) encountered during initialization, see above.
+e621dl      INFO     Running e621dl version 3.0.2 -- Forked from 2.4.6.
+config      ERROR    No config file found.
+config      INFO     New default file created: "config.ini".
+tags        ERROR    Please add at least one tag group to "config.ini".
+e621dl      INFO     Error(s) occurred during initialization, see above for more information.
 ```
 
 These errors are normal behavior for a first run, and should not raise any alarm. **e621dl** is telling you that it was unable to find the _config_, _tags_, or _blacklist_ files, nor the _downloads_ folder, so it created them.
@@ -78,18 +75,19 @@ parallel_downloads | Integer 1 to 16      | The maximum number of simultaneous d
 Once you have added at least one group to the tags file, you should see something similar to this when you run **e621dl**:
 
 ```
-e621dl      INFO     Running e621dl version 2.5.2b -- Forked from 2.4.6.
-e621dl      INFO     e621dl was last run on 2016-11-27.
+e621dl      INFO     Running e621dl version 3.0.2 -- Forked from 2.4.6.
+e621dl      INFO     Parsing config for blacklist and settings.
+e621dl      INFO     e621dl will look for new posts since 2017-01-01.
 
-e621dl      INFO     Checking for new posts tagged: cat.
-e621dl      INFO     4 new (8 found, 1 missing tags, 1 blacklisted, 2 downloaded, 0 cached)
+e621dl      INFO     Checking for new posts tagged: "cute, cat".
+e621dl      INFO     3 new files. (8 found, 2 missing tags, 0 blacklisted, 3 duplicate.)
 
-e621dl      INFO     Starting download of 4 files.
+e621dl      INFO     Checking for new posts tagged: "cute, dog".
+e621dl      INFO     0 new files. (6 found, 0 missing tags, 1 blacklisted, 5 duplicate.)
 
-Downloading:        [###################################] 100.00% Done...
+Downloading          [>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>] 100.00% (3 / 3)  -- Done.
 
-e621dl      INFO     Successfully downloaded 4 files.
-e621dl      INFO     Last run updated to 2016-11-26.
+e621dl      INFO     Successfully downloaded 3 files.
 ```
 
 There is quite a bit of information here. Since last time **e621dl** was run on 2014-06-27, there have been 8 uploads that match the search "cat". One post did not contain every tag which we specified. This is because e621 will only accept 5 initial tags and any additional tags are checked by e621dl. 1 post has a tag that was in our blacklist, so it will be skipped. 2 posts have already been downloaded in a previous run, so they will also be skipped. The 4 remaining posts will be downloaded and added the downloads folder. Once they have been downloaded, **e621dl** updates its last run date to the day before it was run, 2014-11-26, and is ready for its next use.

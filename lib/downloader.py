@@ -26,10 +26,10 @@ def update_progress(downloaded, total):
         progress = float(progress)
     if progress < 0:
         progress = 0.0
-        status = '-- Stopped.\n'
+        status = ' -- Stopped.\n'
     if progress >= 1:
         progress = 1.0
-        status = '-- Done.\n'
+        status = ' -- Done.\n'
     completed = int(round(BAR_LENGTH * progress))
     progress_bar = '\rDownloading          [{}] {:6.2f}% {} {}'.format('>' * completed +
         ' ' * (BAR_LENGTH - completed), progress * 100, '(' + str(downloaded) + ' / ' + str(total) +
