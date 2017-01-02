@@ -42,11 +42,11 @@ def get_config(filename):
 
     if not os.path.isfile(filename):
         LOG.error('No config file found.')
-        return make_config(filename)
-    else:
-        with open(filename, 'r') as infile:
-            config.readfp(infile)
-            return config
+        make_config(filename)
+
+    with open(filename, 'r') as infile:
+        config.readfp(infile)
+        return config
 
 def validate_tags(config):
     LOG = logging.getLogger('tags')

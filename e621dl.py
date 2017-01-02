@@ -19,13 +19,10 @@ if __name__ == '__main__':
     LOG = logging.getLogger('e621dl')
     LOG.info('Running e621dl version ' + constants.VERSION + '.')
 
-    early_terminate = False
-
-    early_terminate |= not downloader.internet_connected()
-
-    early_terminate |= not os.path.isfile('config.ini')
     CONFIG = support.get_config('config.ini')
 
+    early_terminate = False
+    early_terminate |= not downloader.internet_connected()
     early_terminate |= support.validate_tags(CONFIG)
 
     if early_terminate:

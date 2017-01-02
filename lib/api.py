@@ -28,7 +28,8 @@ def get_posts(search_string, uploaded_after, page_number, max_results):
     return posts
 
 def download_post(url, filename):
-    open(filename, 'wb').write(SpoofOpen().open(url).read())
+    with open(filename, 'wb') as outfile:
+        outfile.write(SpoofOpen().open(url).read())
 
 def get_alias(tag):
     request = 'https://e621.net/tag_alias/index.json?query=' + tag
