@@ -33,7 +33,7 @@ def make_config(filename):
     LOG = logging.getLogger('config')
 
     with open(filename, 'w') as outfile:
-        outfile.write(constants.CONFIG_FILE)
+        outfile.write(constants.DEFAULT_CONFIG_TEXT)
         LOG.info('New default file created: \"' + filename + '\".')
 
 def get_config(filename):

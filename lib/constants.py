@@ -1,19 +1,21 @@
 #!/usr/bin/env python
 
-from datetime import datetime
+import datetime
+import lib.support as support
 
 DATE_FORMAT = "%Y-%m-%d"
+YESTERDAY = datetime.date.fromordinal(datetime.date.today().toordinal() - 1)
 LOGGER_FORMAT = "%(name)-11s %(levelname)-8s %(message)s"
 MAX_RESULTS = 100
+CONFIG = support.get_config('config.ini')
+VERSION = '3.0.2 -- Forked from 2.4.6'
 
-VERSION = '3.0.1 -- Forked from 2.4.6'
-
-CONFIG_FILE = ''';;;;;;;;;;;;;;;;;;;
+DEFAULT_CONFIG_TEXT = ''';;;;;;;;;;;;;;;;;;;
 ;; MAIN SETTINGS ;;
 ;;;;;;;;;;;;;;;;;;;
 
 [Settings]
-last_run = ''' + datetime.now().strftime(DATE_FORMAT) + '''
+last_run = ''' + YESTERDAY.strftime(DATE_FORMAT) + '''
 parallel_downloads = 8
 
 [Blacklist]

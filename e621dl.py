@@ -3,7 +3,6 @@
 import logging
 import os
 import sys
-import datetime
 from multiprocessing import freeze_support
 from collections import namedtuple
 import lib.constants as constants
@@ -19,11 +18,9 @@ if __name__ == '__main__':
     LOG = logging.getLogger('e621dl')
     LOG.info('Running e621dl version ' + constants.VERSION + '.')
 
-    CONFIG = support.get_config('config.ini')
-
     early_terminate = False
     early_terminate |= not downloader.internet_connected()
-    early_terminate |= support.validate_tags(CONFIG)
+    early_terminate |= support.validate_tags(constants.CONFIG)
 
     if early_terminate:
         LOG.info('Error(s) occurred during initialization, see above for more information.')
@@ -35,18 +32,19 @@ if __name__ == '__main__':
 
     LOG.info('Parsing config for blacklist and settings.')
 
-    for section in CONFIG.sections():
+    for section in constants.CONFIG.sections():
         if section == 'Settings':
             pass
         elif section == 'Blacklist':
-            for tag in CONFIG.get('Blacklist', 'tags').replace(',', '').split():
+            for tag in constants.CONFIG.get('Blacklist', 'tags').replace(',', '').split():
                 blacklist.append(api.get_alias(tag))
         else:
-            for option, value in CONFIG.items(section):
+            for option, value in constants.CONFIG.items(section):
                 if option == 'tags':
                     tag_groups.append(GROUP(value.replace(',', ''), section))
 
-    LOG.info('e621dl was last run on ' + CONFIG.get('Settings', 'last_run') + '.')
+    LOG.info('e621dl will look for new posts since ' +
+        constants.CONFIG.get('Settings', 'last_run') + '.')
     print ''
 
     download_list = []
@@ -76,7 +74,7 @@ if __name__ == '__main__':
             search_tags = group.tags
 
         while accumulating:
-            links_found = api.get_posts(search_tags, CONFIG.get('Settings', 'last_run'),
+            links_found = api.get_posts(search_tags, constants.CONFIG.get('Settings', 'last_run'),
             current_page, constants.MAX_RESULTS)
 
             if not links_found:
@@ -94,7 +92,7 @@ if __name__ == '__main__':
                 filename = support.make_filename(group.directory, post)
                 current_tags = post.tags.split()
 
-                if len(separated_tags) > 5 and list(set(tag_overflow) & set(current_tags)) == []:
+                if len(separated_tags) > 5 and not list(set(tag_overflow) & set(current_tags)):
                     links_missing_tags += 1
                     LOG.debug('Item ' + str(i) + ' was skipped. Missing a requested tag.')
 
@@ -122,16 +120,14 @@ if __name__ == '__main__':
 
     if download_list:
         LOG.info('Starting download of ' + str(len(download_list)) + ' files.')
-        downloader.multi_download(download_list, CONFIG.getint('Settings',
+        downloader.multi_download(download_list, constants.CONFIG.getint('Settings',
             'parallel_downloads'))
         print ''
         LOG.info('Successfully downloaded ' + str(len(download_list)) + ' files.')
     else:
         LOG.info('Nothing to download.')
 
-    YESTERDAY = datetime.date.fromordinal(datetime.date.today().toordinal() - 1)
-
-    CONFIG.set('Settings', 'last_run', YESTERDAY.strftime(constants.DATE_FORMAT))
-    CONFIG.write(open('config.ini', 'w'))
+    constants.CONFIG.set('Settings', 'last_run', constants.YESTERDAY.strftime(constants.DATE_FORMAT))
+    constants.CONFIG.write(open('config.ini', 'w'))
 
     sys.exit(0)
