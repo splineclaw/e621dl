@@ -70,15 +70,7 @@ Most users will not need to modify the settings section of the `config.ini` file
 
 Key                   | Acceptable Values | Description
 --------------------- |  -----------------| ----------------------------------------------------------------------------------
-file_name             | `md5` or `id`     | The name given to each downloaded file. Can either be the md5 sum or the post id.
 last_run              |Date `YYYY-MM-DD` | The last day **e621dl** was run. You may edit this freely to download older posts.
-
-#### Advanced Values
-
-_(Most users will not need to change the advanced settings.)_
-
-Key                | Acceptable Values    | Description
---------------------- |  -----------------| ----------------------------------------------------------------------------------
 parallel_downloads | Integer 1 to 16      | The maximum number of simultaneous downloads allowed to be performed.
 
 ## Normal Operation
@@ -95,7 +87,6 @@ e621dl      INFO     4 new (8 found, 1 missing tags, 1 blacklisted, 2 downloaded
 e621dl      INFO     Starting download of 4 files.
 
 Downloading:        [###################################] 100.00% Done...
-
 
 e621dl      INFO     Successfully downloaded 4 files.
 e621dl      INFO     Last run updated to 2016-11-26.

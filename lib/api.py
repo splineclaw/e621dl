@@ -1,17 +1,16 @@
 #!/usr/bin/env python
 
-from collections import namedtuple
-from support import SpoofOpen
 import logging
 from json import loads
-import sys
+from collections import namedtuple
+from support import SpoofOpen
+import sqlite3 as sqlite
 
-POST = namedtuple('Post', 'url md5 ext id tags')
-USER_TAG = namedtuple('User', 'alias_id name')
-ALIASED_TAG = namedtuple('Alias', 'name')
+Post = namedtuple('Post', 'url id ext tags')
+UserTag = namedtuple('UserTag', 'alias_id name')
+AliasedTag = namedtuple('AliasedTag', 'name')
 
-spoof = SpoofOpen()
-log = logging.getLogger('api')
+LOG = logging.getLogger('api')
 
 def get_posts(search_string, uploaded_after, page_number, max_results):
     request = 'https://e621.net/post/index.json?' + \
@@ -20,48 +19,53 @@ def get_posts(search_string, uploaded_after, page_number, max_results):
         '&page=' + str(page_number) + \
         '&limit=' + str(max_results)
 
-    log.debug('Post request URL: \"' + request + '\".')
+    LOG.debug('Post request URL: \"' + request + '\".')
 
-    results = loads(spoof.open(request).read().decode())
+    results = loads(SpoofOpen().open(request).read().decode())
+
+    connection = sqlite.connect('.download_list.db')
 
     posts = []
-    for post in results:
-        posts.append(POST(post['file_url'], post['md5'], post['file_ext'], post['id'],
-        post['tags']))
+    with connection:
+        cursor = connection.cursor()
+        cursor.execute('DROP TABLE IF EXISTS Posts')
+        cursor.execute('CREATE TABLE Posts(url TEXT, id INT, ext TEXT, tags TEXT)')
+        for post in results:
+            cursor.execute('INSERT INTO Posts VALUES(?, ?, ?, ?);', (post['file_url'], post['id'],
+                post['file_ext'], post['tags']))
+            posts.append(Post(post['file_url'], post['id'], post['file_ext'], post['tags']))
     return posts
 
 def download_post(url, filename):
-    with open(filename, 'wb') as dest:
-        source = spoof.open(url)
-        dest.write(source.read())
+    open(filename, 'wb').write(SpoofOpen().open(url).read())
 
 def get_alias(tag):
     request = 'https://e621.net/tag_alias/index.json?query=' + tag
-    log.debug('Tag alias request URL: \"' + request + '\".')
+    LOG.debug('Tag alias request URL: \"' + request + '\".')
 
-    results = loads(spoof.open(request).read().decode())
+    results = loads(SpoofOpen().open(request).read().decode())
 
-    userTags = []
-    for userTag in results:
-        userTags.append(USER_TAG(userTag['alias_id'], userTag['name']))
+    user_tags = []
+    for user_tag in results:
+        user_tags.append(UserTag(user_tag['alias_id'], user_tag['name']))
 
-    if userTags == []:
-        log.error('The tag \"' + tag + '\" does not exist, please remove it from your tags ' +
+    if not user_tags:
+        LOG.error('The tag \"' + tag + '\" does not exist, please remove it from your tags ' +
             'file or blacklist.')
         return ''
 
-    if tag == userTags[0].name:
-        request = 'https://e621.net/tag/show.json?id=' + str(userTags[0].alias_id)
-        log.debug('Tag official request URL: \"' + request + '\".')
+    if tag == user_tags[0].name:
+        request = 'https://e621.net/tag/show.json?id=' + str(user_tags[0].alias_id)
+        LOG.debug('Tag official request URL: \"' + request + '\".')
 
-        results = loads('[' + spoof.open(request).read() + ']'.decode())
+        results = loads('[' + SpoofOpen().open(request).read() + ']'.decode())
 
-        aliasedTags = []
-        for aliasedTag in results:
-            aliasedTags.append(ALIASED_TAG(aliasedTag['name']))
+        aliased_tags = []
+        for aliased_tag in results:
+            aliased_tags.append(AliasedTag(aliased_tag['name']))
 
-        log.debug('Tag \"' + tag + '\" aliased to \"' + aliasedTags[0].name + '\".')
-        return aliasedTags[0].name
+        LOG.debug('Tag \"' + tag + '\" aliased to \"' + aliased_tags[0].name + '\".')
+        return aliased_tags[0].name
 
     else:
         return tag

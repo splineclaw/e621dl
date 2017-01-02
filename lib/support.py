@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
-from urllib import FancyURLopener
 import argparse
 import logging
-import constants
-import ConfigParser
 import os
+import ConfigParser
+from urllib import FancyURLopener
+import constants
 
 class SpoofOpen(FancyURLopener):
     version = 'Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.8.0.12) ' + \
@@ -30,18 +30,18 @@ def get_verbosity():
         return logging.INFO
 
 def make_config(filename):
-    log = logging.getLogger('config')
+    LOG = logging.getLogger('config')
 
     with open(filename, 'w') as outfile:
-            outfile.write(constants.CONFIG_FILE)
-            log.info('New default file created: \"' + filename + '\".')
+        outfile.write(constants.CONFIG_FILE)
+        LOG.info('New default file created: \"' + filename + '\".')
 
 def get_config(filename):
-    log = logging.getLogger('config')
+    LOG = logging.getLogger('config')
     config = ConfigParser.ConfigParser()
 
     if not os.path.isfile(filename):
-        log.error('No config file found.')
+        LOG.error('No config file found.')
         return make_config(filename)
     else:
         with open(filename, 'r') as infile:
@@ -49,27 +49,25 @@ def get_config(filename):
             return config
 
 def validate_tags(config):
-    log = logging.getLogger('tags')
+    LOG = logging.getLogger('tags')
 
     sections = 0
-    for section in config.sections():
+    for _ in config.sections():
         sections += 1
 
     if sections < 3:
-        log.error('Please add at least one tag group to \"config.ini\".')
+        LOG.error('Please add at least one tag group to \"config.ini\".')
         return True
     else:
         return False
-
-
 
 def substitute_illegals(char):
     illegals = ['\\', '/', ':', '*', '?', '\"', '<', '>', '|', ' ']
     return '_' if char in illegals else char
 
-def make_filename(directory_name, post, config):
-    safe_directory = ''.join([substitute_illegals(char) for char in directory_name])
-    name = str(getattr(post, config.get('Settings', 'file_name')))
+def make_filename(directory_name, post):
+    safe_directory = ''.join([substitute_illegals(char) for char in directory_name]).lower()
+    name = str(getattr(post, 'id'))
 
     if not os.path.isdir('downloads/' + safe_directory.decode('utf-8')):
         os.makedirs('downloads/' + safe_directory)

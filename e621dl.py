@@ -1,132 +1,142 @@
+#!/usr/bin/env python
+
 import logging
-import lib.constants as constants
-import sys
-import lib.support as support
-import ConfigParser
 import os
-import lib.api as api
-from collections import namedtuple
-import lib.downloader as downloader
-from multiprocessing import freeze_support
+import sys
 import datetime
+from multiprocessing import freeze_support
+from collections import namedtuple
+import lib.constants as constants
+import lib.support as support
+import lib.api as api
+import lib.downloader as downloader
+import sqlite3 as sqlite
 
 if __name__ == '__main__':
     freeze_support()
 
     logging.basicConfig(level = support.get_verbosity(), format = constants.LOGGER_FORMAT,
         stream = sys.stderr)
-    log = logging.getLogger('e621dl')
-    log.info('Running e621dl version ' + constants.VERSION + '.')
+    LOG = logging.getLogger('e621dl')
+    LOG.info('Running e621dl version ' + constants.VERSION + '.')
 
-    earlyTerminate = False
+    early_terminate = False
 
-    earlyTerminate |= not downloader.internet_connected()
+    early_terminate |= not downloader.internet_connected()
 
-    earlyTerminate |= not os.path.isfile('config.ini')
-    config = support.get_config('config.ini')
+    early_terminate |= not os.path.isfile('config.ini')
+    CONFIG = support.get_config('config.ini')
 
-    earlyTerminate |= support.validate_tags(config)
+    early_terminate |= support.validate_tags(CONFIG)
 
-    if earlyTerminate:
-        log.info('Error(s) occurred during initialization, see above for more information.')
+    if early_terminate:
+        LOG.info('Error(s) occurred during initialization, see above for more information.')
         sys.exit(-1)
 
     GROUP = namedtuple('Group', 'tags directory')
     blacklist = []
-    tagGroups = []
+    tag_groups = []
 
-    for section in config.sections():
+    LOG.info('Parsing config for blacklist and settings.')
+
+    for section in CONFIG.sections():
         if section == 'Settings':
             pass
         elif section == 'Blacklist':
-            for tag in config.get('Blacklist', 'tags').replace(',', '').split():
+            for tag in CONFIG.get('Blacklist', 'tags').replace(',', '').split():
                 blacklist.append(api.get_alias(tag))
         else:
-            for option, value in config.items(section):
+            for option, value in CONFIG.items(section):
                 if option == 'tags':
-                    tagGroups.append(GROUP(value.replace(',', ''), section))
+                    tag_groups.append(GROUP(value.replace(',', ''), section))
 
-    log.info('e621dl was last run on ' + config.get('Settings', 'last_run') + '.')
+    LOG.info('e621dl was last run on ' + CONFIG.get('Settings', 'last_run') + '.')
+    print ''
 
-    downloadList = []
+    download_list = []
+    connection = sqlite.connect('.download_list.db')
 
-    for group in tagGroups:
-        log.info('Checking for new posts tagged: \"' + group.tags + '\".')
+    for group in tag_groups:
+        LOG.info('Checking for new posts tagged: \"' + group.tags.replace(' ', ', ') + '\".')
 
         accumulating = True
-        currentPage = 1
-        linksMissingTags = 0
-        linksBlacklisted = 0
-        linksOnDisk = 0
-        willDownload = 0
-        postList = []
-        tagOverflow = []
+        current_page = 1
+        links_missing_tags = 0
+        links_blacklisted = 0
+        links_on_disk = 0
+        will_download = 0
+        post_list = []
+        tag_overflow = []
 
-        separatedTags = group.tags.split()
+        separated_tags = group.tags.split()
 
-        if len(separatedTags) > 5:
-            searchTags = ' '.join(separatedTags[0:5])
+        if len(separated_tags) > 5:
+            search_tags = ' '.join(separated_tags[0:5])
 
-            for tag in separatedTags:
-                if tag not in searchTags.split():
-                    tagOverflow.append(api.get_alias(tag))
+            for tag in separated_tags:
+                if tag not in search_tags.split():
+                    tag_overflow.append(api.get_alias(tag))
 
         else:
-            searchTags = group.tags
+            search_tags = group.tags
 
         while accumulating:
-            linksFound = api.get_posts(searchTags, config.get('Settings', 'last_run'),
-            currentPage, constants.MAX_RESULTS)
+            links_found = api.get_posts(search_tags, CONFIG.get('Settings', 'last_run'),
+            current_page, constants.MAX_RESULTS)
 
-            if not linksFound:
+            if not links_found:
                 accumulating = False
 
             else:
-                postList += linksFound
-                accumulating = len(linksFound) == constants.MAX_RESULTS
-                currentPage += 1
+                post_list += links_found
+                accumulating = len(links_found) == constants.MAX_RESULTS
+                current_page += 1
 
-        if len(postList) > 0:
-            for i, post in enumerate(postList):
-                log.debug('Item ' + str(i) + '\'s md5 is \"' + post.md5 + '\", and its id is ' +
-                    '\"' + str(post.id) + '\".')
+        if len(post_list) > 0:
+            for i, post in enumerate(post_list):
+                LOG.debug('Item ' + str(i) + '\'s id is \"' + str(post.id) + '\".')
 
-                filename = support.make_filename(group.directory, post, config)
-                currentTags = post.tags.split()
+                filename = support.make_filename(group.directory, post)
+                current_tags = post.tags.split()
 
-                if len(separatedTags) > 5 and list(set(tagOverflow) & set(currentTags)) == []:
-                    linksMissingTags += 1
-                    log.debug('Item ' + str(i) + ' was skipped. Missing a requested tag.')
+                if len(separated_tags) > 5 and list(set(tag_overflow) & set(current_tags)) == []:
+                    links_missing_tags += 1
+                    LOG.debug('Item ' + str(i) + ' was skipped. Missing a requested tag.')
 
-                elif list(set(blacklist) & set(currentTags)) != []:
-                    linksBlacklisted += 1
-                    log.debug('Item ' + str(i) + ' was skipped. Contains a blacklisted tag.')
+                elif list(set(blacklist) & set(current_tags)):
+                    links_blacklisted += 1
+                    LOG.debug('Item ' + str(i) + ' was skipped. Contains a blacklisted tag.')
 
                 elif os.path.isfile(filename):
-                    linksOnDisk += 1
-                    log.debug('Item ' + str(i) + ' was skipped. Already downloaded previously.')
+                    links_on_disk += 1
+                    LOG.debug('Item ' + str(i) + ' was skipped. Already downloaded previously.')
 
                 else:
-                    log.debug('Item ' + str(i) + ' will be downloaded.')
-                    downloadList.append((post.url, filename))
-                    willDownload += 1
+                    LOG.debug('Item ' + str(i) + ' will be downloaded.')
+                    download_list.append((post.url, filename))
+                    will_download += 1
 
-            log.info(str(willDownload) + ' new files. (' + str(len(postList)) + ' found, ' +
-            str(linksMissingTags) + ' missing tags, ' + str(linksBlacklisted) + ' blacklisted, ' +
-            str(linksOnDisk) + ' duplicate.)')
+            LOG.info(str(will_download) + ' new files. (' + str(len(post_list)) + ' found, ' +
+            str(links_missing_tags) + ' missing tags, ' + str(links_blacklisted) +
+            ' blacklisted, ' + str(links_on_disk) + ' duplicate.)')
+            print ''
 
-    if downloadList:
-        log.info('Starting download of ' + str(len(downloadList)) + ' files.')
-        downloader.multi_download(downloadList, config.getint('Settings', 'parallel_downloads'))
-        log.info('Successfully downloaded ' + str(len(downloadList)) + ' files.')
+        else:
+            LOG.info('0 new files.')
+            print ''
+
+    if download_list:
+        LOG.info('Starting download of ' + str(len(download_list)) + ' files.')
+        downloader.multi_download(download_list, CONFIG.getint('Settings',
+            'parallel_downloads'))
+        print ''
+        LOG.info('Successfully downloaded ' + str(len(download_list)) + ' files.')
     else:
-        log.info('Nothing to download.')
+        LOG.info('Nothing to download.')
 
-    yesterday = datetime.date.fromordinal(datetime.date.today().toordinal() - 1)
+    YESTERDAY = datetime.date.fromordinal(datetime.date.today().toordinal() - 1)
 
-    with open('config.ini', 'w') as outfile:
-        config.set('Settings', 'last_run', yesterday.strftime(constants.DATE_FORMAT))
-        config.write(outfile)
+    CONFIG.set('Settings', 'last_run', YESTERDAY.strftime(constants.DATE_FORMAT))
+    CONFIG.write(open('config.ini', 'w'))
 
-    log.info('Last run date updated to ' + config.get('Settings', 'last_run') + '.')
     sys.exit(0)

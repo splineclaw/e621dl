@@ -1,19 +1,20 @@
 #!/usr/bin/env python
 
-from support import SpoofOpen
 import logging
-from time import sleep
-from multiprocessing import Pool, Manager, Process
-from itertools import repeat
 import urllib2
+from itertools import repeat
+from multiprocessing import Pool, Manager, Process
+from time import sleep
+from support import SpoofOpen
 
 def internet_connected():
     try:
         urllib2.urlopen('http://www.msftncsi.com/ncsi.txt', timeout = 5)
         return True
-    except urllib2.URLError as err: pass
-    log = logging.getLogger('internet')
-    log.info('No internet connection detected.')
+    except urllib2.URLError:
+        pass
+    LOG = logging.getLogger('internet')
+    LOG.info('No internet connection detected.')
     return False
 
 def update_progress(downloaded, total):
@@ -24,27 +25,27 @@ def update_progress(downloaded, total):
     if isinstance(progress, int):
         progress = float(progress)
     if progress < 0:
-        progress = 0
+        progress = 0.0
         status = '-- Stopped.\n'
     if progress >= 1:
-        progress = 1
+        progress = 1.0
         status = '-- Done.\n'
     completed = int(round(BAR_LENGTH * progress))
-    bar = '\rDownloading          [{}] {:6.2f}% {} {}'.format('>' * completed +
+    progress_bar = '\rDownloading          [{}] {:6.2f}% {} {}'.format('>' * completed +
         ' ' * (BAR_LENGTH - completed), progress * 100, '(' + str(downloaded) + ' / ' + str(total) +
         ')', status)
-    print bar,
+    print progress_bar,
 
-def download_monitor(managedList, totalItems):
+def download_monitor(managed_list, total_items):
     while True:
-        update_progress(len(managedList), totalItems)
-        if totalItems == len(managedList):
+        update_progress(len(managed_list), total_items)
+        if total_items == len(managed_list):
             return
-        sleep (0.2)
+        sleep(0.2)
 
-def single_download(zippedArgs):
-    urlNameList, managedList = zippedArgs
-    url, filename = urlNameList
+def single_download(zipped_args):
+    url_name_list, managed_list = zipped_args
+    url, filename = url_name_list
 
     spoof = SpoofOpen()
 
@@ -53,25 +54,25 @@ def single_download(zippedArgs):
             source = spoof.open(url)
             dest.write(source.read())
 
-        log = logging.getLogger('single_dl')
-        log.debug('Downloading \"' + filename + '\".')
-        managedList.append(filename)
+        LOG = logging.getLogger('single_dl')
+        LOG.debug('Downloading \"' + filename + '\".')
+        managed_list.append(filename)
 
-    except KeyboardInterrupt, e:
+    except KeyboardInterrupt:
         pass
 
-def multi_download(urlNameList, numThreads):
+def multi_download(url_name_list, num_threads):
     manager = Manager()
-    managedList = manager.list()
+    managed_list = manager.list()
 
-    log = logging.getLogger('multi_dl')
-    log.debug('Staring download pool of ' + str(numThreads) + ' workers.')
+    LOG = logging.getLogger('multi_dl')
+    LOG.debug('Staring download pool of ' + str(num_threads) + ' workers.')
 
-    monitor = Process(target = download_monitor, args = ((managedList, len(urlNameList))))
+    monitor = Process(target = download_monitor, args = (managed_list, len(url_name_list)))
     monitor.start()
 
-    workers = Pool(processes = numThreads)
-    work = workers.map_async(single_download, zip(urlNameList, repeat(managedList)))
+    workers = Pool(processes = num_threads)
+    work = workers.map_async(single_download, zip(url_name_list, repeat(managed_list)))
 
     try:
         work.get(0xFFFF)
