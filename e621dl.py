@@ -10,7 +10,6 @@ import lib.constants as constants
 import lib.support as support
 import lib.api as api
 import lib.downloader as downloader
-import sqlite3 as sqlite
 
 if __name__ == '__main__':
     freeze_support()
@@ -54,7 +53,6 @@ if __name__ == '__main__':
     print ''
 
     download_list = []
-    connection = sqlite.connect('.download_list.db')
 
     for group in tag_groups:
         LOG.info('Checking for new posts tagged: \"' + group.tags.replace(' ', ', ') + '\".')

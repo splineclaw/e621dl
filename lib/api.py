@@ -4,7 +4,6 @@ import logging
 from json import loads
 from collections import namedtuple
 from support import SpoofOpen
-import sqlite3 as sqlite
 
 Post = namedtuple('Post', 'url id ext tags')
 UserTag = namedtuple('UserTag', 'alias_id name')
@@ -23,17 +22,9 @@ def get_posts(search_string, uploaded_after, page_number, max_results):
 
     results = loads(SpoofOpen().open(request).read().decode())
 
-    connection = sqlite.connect('.download_list.db')
-
     posts = []
-    with connection:
-        cursor = connection.cursor()
-        cursor.execute('DROP TABLE IF EXISTS Posts')
-        cursor.execute('CREATE TABLE Posts(url TEXT, id INT, ext TEXT, tags TEXT)')
-        for post in results:
-            cursor.execute('INSERT INTO Posts VALUES(?, ?, ?, ?);', (post['file_url'], post['id'],
-                post['file_ext'], post['tags']))
-            posts.append(Post(post['file_url'], post['id'], post['file_ext'], post['tags']))
+    for post in results:
+        posts.append(Post(post['file_url'], post['id'], post['file_ext'], post['tags']))
     return posts
 
 def download_post(url, filename):
