@@ -1,11 +1,23 @@
 #!/usr/bin/env python
 
+def pip_install(package):
+    import importlib
+    try:
+        importlib.import_module(package)
+    except ImportError:
+        import pip
+        pip.main(['install', package])
+    finally:
+        globals()[package] = importlib.import_module(package)
+
 import logging
 import os
 import sys
-from multiprocessing import freeze_support
+from multiprocessing import freeze_support, cpu_count
 from collections import namedtuple
 from lib import constants, support, api, downloader
+
+pip_install('imghdr')
 
 if __name__ == '__main__':
     freeze_support()
@@ -29,7 +41,7 @@ if __name__ == '__main__':
     blacklist = []
     tag_groups = []
 
-    LOG.info('Parsing config for blacklist and settings.')
+    LOG.info('Parsing config.')
 
     for section in CONFIG.sections():
         if section == 'Settings':
@@ -42,8 +54,27 @@ if __name__ == '__main__':
                 if option == 'tags':
                     tag_groups.append(GROUP(value.replace(',', ''), section))
 
-    LOG.info('e621dl will look for new posts since ' +
-        CONFIG.get('Settings', 'last_run') + '.')
+    print ''
+
+    LOG.info('Searching download directory for damaged files.')
+
+    prunedFiles = 0
+
+    for root, dirs, files in os.walk('downloads'):
+        for file in files:
+            if imghdr.what(os.path.join(root, file)) == None:
+                prunedFiles += 1
+                os.remove(os.path.join(root, file))
+                LOG.debug('Removed ' + os.path.join(root, file) + '.')
+
+    if prunedFiles > 0:
+        LOG.info('Removed ' + str(prunedFiles) + ' damaged files.')
+    else:
+        LOG.info('No damaged files were found.')
+
+    print ''
+
+    LOG.info('Looking for new posts since ' + CONFIG.get('Settings', 'last_run') + '.')
     print ''
 
     download_list = []
@@ -119,8 +150,7 @@ if __name__ == '__main__':
 
     if download_list:
         LOG.info('Starting download of ' + str(len(download_list)) + ' files.')
-        downloader.multi_download(download_list, CONFIG.getint('Settings',
-            'parallel_downloads'))
+        downloader.multi_download(download_list, cpu_count())
         print ''
         LOG.info('Successfully downloaded ' + str(len(download_list)) + ' files.')
     else:
