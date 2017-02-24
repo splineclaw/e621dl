@@ -63,12 +63,9 @@ Most users will not need to modify the settings section of the `config.ini` file
 
 ### Config Keys, Values, and Descriptions
 
-#### Common Values
-
 Key                   | Acceptable Values | Description
 --------------------- |  -----------------| ----------------------------------------------------------------------------------
 last_run              |Date `YYYY-MM-DD` | The last day **e621dl** was run. You may edit this freely to download older posts.
-parallel_downloads | Integer 1 to 16      | The maximum number of simultaneous downloads allowed to be performed.
 
 ## Normal Operation
 

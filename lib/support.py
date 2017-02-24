@@ -8,7 +8,7 @@ from urllib import FancyURLopener
 import constants
 
 class SpoofOpen(FancyURLopener):
-    version = 'e621/' + constants.VERSION + ' (by Wulfre)'
+    version = 'e621dl/' + constants.VERSION + ' (by Wulfre)'
 
 def get_verbosity():
     parser = argparse.ArgumentParser(prog = 'e621dl', description = 'An automated e621 downloader.')
