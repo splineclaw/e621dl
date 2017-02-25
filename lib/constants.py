@@ -14,7 +14,6 @@ DEFAULT_CONFIG_TEXT = ''';;;;;;;;;;;;;;;;;;;
 
 [Settings]
 last_run = ''' + YESTERDAY.strftime(DATE_FORMAT) + '''
-parallel_downloads = 8
 
 [Blacklist]
 tags =

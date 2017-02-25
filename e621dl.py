@@ -125,9 +125,6 @@ if __name__ == '__main__':
         downloader.multi_download(download_list, cpu_count())
         print ''
 
-        LOG.info('Successfully downloaded ' + str(len(download_list)) + ' files.')
-        print ''
-
         LOG.info('Checking downloads for damaged files.')
 
         prunedFiles = 0
