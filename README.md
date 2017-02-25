@@ -6,11 +6,11 @@
 
 Put very simply, when **e621dl** starts, it determines the following:
 
-- Which searches you would like to perform by reading `tag.txt`.
-- Which tags you would like to avoid seeing by reading `blacklist.txt`.
-- The last time it was run by reading `config.txt`.
+- Which tags you would like to avoid seeing by reading the blacklist section in `config.ini`.
+- Which searches you would like to perform by reading your tag group sections in `config.ini`.
+- The last time it was run by reading the settings section in `config.ini`.
 
-Once it knows these things, it goes through the searches one by one, and downloads _only_ content uploaded since the last time it was run.
+Once it knows these things, it goes through the searches one by one, and downloads _only_ content that matches your search and blacklist request, and has been uploaded since the last time it was run.
 
 # Installing **e621dl**
 

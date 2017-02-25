@@ -5,8 +5,8 @@ from json import loads
 from collections import namedtuple
 from support import SpoofOpen
 
-Post = namedtuple('Post', 'url id ext tags')
-UserTag = namedtuple('UserTag', 'alias_id name')
+Post = namedtuple('Post', 'url id md5 ext tags')
+UserTag = namedtuple('UserTag', 'aliasz_id name')
 AliasedTag = namedtuple('AliasedTag', 'name')
 
 LOG = logging.getLogger('api')
@@ -24,7 +24,8 @@ def get_posts(search_string, uploaded_after, page_number, max_results):
 
     posts = []
     for post in results:
-        posts.append(Post(post['file_url'], post['id'], post['file_ext'], post['tags']))
+        posts.append(Post(post['file_url'], post['id'], post['md5'], post['file_ext'],
+        post['tags']))
     return posts
 
 def download_post(url, filename):

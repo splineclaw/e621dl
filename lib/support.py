@@ -66,11 +66,11 @@ def substitute_illegals(char):
 
 def make_filename(directory_name, post):
     safe_directory = ''.join([substitute_illegals(char) for char in directory_name]).lower()
-    name = str(getattr(post, 'id'))
 
     if not os.path.isdir('downloads/' + safe_directory.decode('utf-8')):
         os.makedirs('downloads/' + safe_directory)
 
-    filename = 'downloads/' + safe_directory + '/' + name + '.' + post.ext
+    filename = 'downloads/' + safe_directory + '/' + str(post.id) + '-' + \
+    post.md5 + '.' + post.ext
 
     return filename

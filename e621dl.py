@@ -1,23 +1,13 @@
 #!/usr/bin/env python
 
-def pip_install(package):
-    import importlib
-    try:
-        importlib.import_module(package)
-    except ImportError:
-        import pip
-        pip.main(['install', package])
-    finally:
-        globals()[package] = importlib.import_module(package)
-
 import logging
 import os
 import sys
 from multiprocessing import freeze_support, cpu_count
 from collections import namedtuple
 from lib import constants, support, api, downloader
-
-pip_install('imghdr')
+import hashlib
+import re
 
 if __name__ == '__main__':
     freeze_support()
@@ -48,29 +38,11 @@ if __name__ == '__main__':
             pass
         elif section == 'Blacklist':
             for tag in CONFIG.get('Blacklist', 'tags').replace(',', '').split():
-                blacklist.append(api.get_alias(tag))
+                blacklist.append(tag)
         else:
             for option, value in CONFIG.items(section):
                 if option == 'tags':
                     tag_groups.append(GROUP(value.replace(',', ''), section))
-
-    print ''
-
-    LOG.info('Searching download directory for damaged files.')
-
-    prunedFiles = 0
-
-    for root, dirs, files in os.walk('downloads'):
-        for file in files:
-            if imghdr.what(os.path.join(root, file)) == None:
-                prunedFiles += 1
-                os.remove(os.path.join(root, file))
-                LOG.debug('Removed ' + os.path.join(root, file) + '.')
-
-    if prunedFiles > 0:
-        LOG.info('Removed ' + str(prunedFiles) + ' damaged files.')
-    else:
-        LOG.info('No damaged files were found.')
 
     print ''
 
@@ -98,7 +70,7 @@ if __name__ == '__main__':
 
             for tag in separated_tags:
                 if tag not in search_tags.split():
-                    tag_overflow.append(api.get_alias(tag))
+                    tag_overflow.append(tag)
 
         else:
             search_tags = group.tags
@@ -152,7 +124,39 @@ if __name__ == '__main__':
         LOG.info('Starting download of ' + str(len(download_list)) + ' files.')
         downloader.multi_download(download_list, cpu_count())
         print ''
+
         LOG.info('Successfully downloaded ' + str(len(download_list)) + ' files.')
+        print ''
+
+        LOG.info('Checking downloads for damaged files.')
+
+        prunedFiles = 0
+
+        for root, dirs, files in os.walk('downloads'):
+            for file in files:
+                realmd5 = file[file.find('-')+1:file.find('.')]
+                md5 = hashlib.md5()
+
+                with open(os.path.join(root, file), 'rb') as openfile:
+                    while True:
+                        data = openfile.read(65536)
+                        if not data:
+                            break
+                        md5.update(data)
+
+                validHash = re.finditer(r'(?=(\b[A-Fa-f0-9]{32}\b))', realmd5)
+                result = [match.group(1) for match in validHash]
+
+                if not md5.hexdigest() == realmd5 and result:
+                        os.remove(os.path.join(root, file))
+                        prunedFiles += 1
+
+        if prunedFiles > 0:
+            LOG.info('Removed ' + str(prunedFiles) + ' damaged files. Please run e621dl again ' + \
+             'to atempt another download.')
+        else:
+            LOG.info('No damaged files were found.')
+
     else:
         LOG.info('Nothing to download.')
 
