@@ -6,7 +6,7 @@ DATE_FORMAT = "%Y-%m-%d"
 YESTERDAY = datetime.date.fromordinal(datetime.date.today().toordinal() - 1)
 LOGGER_FORMAT = "%(name)-11s %(levelname)-8s %(message)s"
 MAX_RESULTS = 100
-VERSION = '3.1.0 -- Forked from 2.4.6'
+VERSION = '3.1.1 -- Forked from 2.4.6'
 
 DEFAULT_CONFIG_TEXT = ''';;;;;;;;;;;;;;;;;;;
 ;; MAIN SETTINGS ;;
