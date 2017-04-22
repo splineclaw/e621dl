@@ -14,7 +14,7 @@ Once it knows these things, it goes through the searches one by one, and downloa
 
 # Installing **e621dl**
 
-- Download and install [the latest release of Python 2](https://www.python.org/downloads/).
+- Download and install [the latest release of Python 3](https://www.python.org/downloads/).
 - Download [the latest release of **e621dl**](https://github.com/wulfre/e621dl/releases/latest).
 
   - Decompress the archive in any directory you would like.
@@ -45,8 +45,6 @@ Add any tags or meta-tags for posts you would like to download their own section
 
 Commas should be used to separate tags.
 
-_If your group contains more than 5 tags, **e621dl** will try to automatically convert all additional tags to their proper alias and filter posts found from the first 5 tags. Until this feature is more thoroughly developed, you may need to consult the [e621 tag list](https://e621.net/tag_alias/) and manually convert aliases that do not get converted automatically. Otherwise, it would be greatly appreciated that you test the automatic tag conversion and report any issues._
-
 One side effect of the workaround used to search an unlimited number tags is that you may only use up to 5 meta tags `:`, negative tags `-`, operational tags `~`, or wildcard tags `*` per group, and they must be the first 5 items in the group. See [the e621 cheatsheet](https://e621.net/help/show/cheatsheet) for more information on these special types of tags.
 
 ## [Optional] Add blacklisted tags to the config file.
@@ -55,7 +53,7 @@ Add any tags for posts you would like to avoid downloading to the blacklist sect
 
 Commas should be used to separate tags.
 
-_**e621dl** will try to automatically convert all tags to their proper aliases. Until this feature is more thoroughly developed, you may want to check your tags against the [e621 tag list](https://e621.net/tag_alias/) and manually convert any tags for content you absolutely do not want to see. Otherwise, it would be greatly appreciated that you test the automatic tag conversion and report any issues._
+_Check your tags against the [e621 tag list](https://e621.net/tag_alias/) and manually convert any tags for content you absolutely do not want to see. Otherwise, it would be greatly appreciated that you test the automatic tag conversion and report any issues._
 
 ## [Optional] Modify the settings in the config file.
 

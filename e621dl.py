@@ -3,56 +3,61 @@
 import logging
 import os
 import sys
+import datetime
 from multiprocessing import freeze_support, cpu_count
 from collections import namedtuple
-from lib import constants, support, api, downloader
-import hashlib
-import re
+from lib import vars, core, api, downloader
 
 if __name__ == '__main__':
     freeze_support()
 
-    logging.basicConfig(level = support.get_verbosity(), format = constants.LOGGER_FORMAT,
-        stream = sys.stderr)
-    LOG = logging.getLogger('e621dl')
-    LOG.info('Running e621dl version ' + constants.VERSION + '.')
+    logging.basicConfig(level = core.get_verbosity(), format = vars.LOGGER_FORMAT, stream = sys.stderr)
+    core.print_log('e621dl', 'info', 'Running e621dl version ' + vars.VERSION + '.')
 
-    CONFIG = support.get_config('config.ini')
+    config = core.get_config('config.ini')
 
     early_terminate = False
-    early_terminate |= not downloader.internet_connected()
-    early_terminate |= support.validate_tags(CONFIG)
+    early_terminate |= core.validate_tags(config)
 
     if early_terminate:
-        LOG.info('Error(s) occurred during initialization, see above for more information.')
+        core.print_log('e621dl', 'info', 'Error(s) occurred during initialization, see above for more information.')
         sys.exit(-1)
 
     GROUP = namedtuple('Group', 'tags directory')
     blacklist = []
     tag_groups = []
 
-    LOG.info('Parsing config.')
+    core.print_log('e621dl', 'info', 'Parsing config.')
 
-    for section in CONFIG.sections():
+    for section in config.sections():
         if section == 'Settings':
             pass
         elif section == 'Blacklist':
-            for tag in CONFIG.get('Blacklist', 'tags').replace(',', '').split():
+            for tag in config.get('Blacklist', 'tags').replace(',', '').split():
                 blacklist.append(tag)
         else:
-            for option, value in CONFIG.items(section):
+            for option, value in config.items(section):
                 if option == 'tags':
                     tag_groups.append(GROUP(value.replace(',', ''), section))
 
-    print ''
+    print('')
 
-    LOG.info('Looking for new posts since ' + CONFIG.get('Settings', 'last_run') + '.')
-    print ''
+    ordinal_check_date = datetime.date.today().toordinal() - int((config.get('Settings', 'days_to_check')))
+    if ordinal_check_date < 1:
+        ordinal_check_date = 1
+    elif ordinal_check_date > datetime.date.today().toordinal() - 1:
+        ordinal_check_date = datetime.date.today().toordinal() - 1
+
+    check_date = datetime.date.fromordinal(ordinal_check_date).strftime(vars.DATE_FORMAT)
+
+    core.print_log('e621dl', 'info', 'Looking for new posts since ' + check_date + '.')
+    print('')
 
     download_list = []
 
     for group in tag_groups:
-        LOG.info('Checking for new posts tagged: \"' + group.tags.replace(' ', ', ') + '\".')
+        core.print_log('e621dl', 'info', 'Group \"' + group.directory + '\" detected.')
+        core.print_log('e621dl', 'info', 'Checking for new posts tagged: \"' + group.tags.replace(' ', ', ') + '\".')
 
         accumulating = True
         current_page = 1
@@ -76,88 +81,59 @@ if __name__ == '__main__':
             search_tags = group.tags
 
         while accumulating:
-            links_found = api.get_posts(search_tags, CONFIG.get('Settings', 'last_run'),
-            current_page, constants.MAX_RESULTS)
+            links_found = api.get_posts(search_tags, check_date, current_page, vars.MAX_RESULTS)
 
             if not links_found:
                 accumulating = False
 
             else:
                 post_list += links_found
-                accumulating = len(links_found) == constants.MAX_RESULTS
+                accumulating = len(links_found) == vars.MAX_RESULTS
                 current_page += 1
 
         if len(post_list) > 0:
             for i, post in enumerate(post_list):
-                LOG.debug('Item ' + str(i) + '\'s id is \"' + str(post.id) + '\".')
+                core.print_log('e621dl', 'debug', 'Item ' + str(i) + '\'s id is \"' + str(post.id) + '\".')
 
-                filename = support.make_filename(group.directory, post)
+                filename = core.make_path(group.directory, post)
                 current_tags = post.tags.split()
 
                 if len(separated_tags) > 5 and not list(set(tag_overflow) & set(current_tags)):
                     links_missing_tags += 1
-                    LOG.debug('Item ' + str(i) + ' was skipped. Missing a requested tag.')
+                    core.print_log('e621dl', 'debug', 'Item ' + str(i) + ' was skipped. Missing a requested tag.')
 
                 elif list(set(blacklist) & set(current_tags)):
                     links_blacklisted += 1
-                    LOG.debug('Item ' + str(i) + ' was skipped. Contains a blacklisted tag.')
+                    core.print_log('e621dl', 'debug', 'Item ' + str(i) + ' was skipped. Contains a blacklisted tag.')
 
                 elif os.path.isfile(filename):
                     links_on_disk += 1
-                    LOG.debug('Item ' + str(i) + ' was skipped. Already downloaded previously.')
+                    core.print_log('e621dl', 'debug', 'Item ' + str(i) + ' was skipped. Already downloaded previously.')
 
                 else:
-                    LOG.debug('Item ' + str(i) + ' will be downloaded.')
+                    core.print_log('e621dl', 'debug', 'Item ' + str(i) + ' will be downloaded.')
                     download_list.append((post.url, filename))
                     will_download += 1
 
-            LOG.info(str(will_download) + ' new files. (' + str(len(post_list)) + ' found, ' +
+            core.print_log('e621dl', 'info', str(will_download) + ' new files. (' + str(len(post_list)) + ' found, ' +
             str(links_missing_tags) + ' missing tags, ' + str(links_blacklisted) +
             ' blacklisted, ' + str(links_on_disk) + ' duplicate.)')
-            print ''
+
+            print('')
 
         else:
-            LOG.info('0 new files.')
-            print ''
+            core.print_log('e621dl', 'info', '0 new files.')
+            print('')
 
     if download_list:
-        LOG.info('Starting download of ' + str(len(download_list)) + ' files.')
+        core.print_log('e621dl', 'info', 'Starting download of ' + str(len(download_list)) + ' files.')
         downloader.multi_download(download_list, cpu_count())
-        print ''
+        print('')
 
-        LOG.info('Checking downloads for damaged files.')
-
-        prunedFiles = 0
-
-        for root, dirs, files in os.walk('downloads'):
-            for file in files:
-                realmd5 = file[file.find('-')+1:file.find('.')]
-                md5 = hashlib.md5()
-
-                with open(os.path.join(root, file), 'rb') as openfile:
-                    while True:
-                        data = openfile.read(65536)
-                        if not data:
-                            break
-                        md5.update(data)
-
-                validHash = re.finditer(r'(?=(\b[A-Fa-f0-9]{32}\b))', realmd5)
-                result = [match.group(1) for match in validHash]
-
-                if not md5.hexdigest() == realmd5 and result:
-                        os.remove(os.path.join(root, file))
-                        prunedFiles += 1
-
-        if prunedFiles > 0:
-            LOG.info('Removed ' + str(prunedFiles) + ' damaged files. Please run e621dl again ' + \
-             'to atempt another download.')
-        else:
-            LOG.info('No damaged files were found.')
+        core.print_log('e621dl', 'info', 'Checking downloads for damaged files.')
+        core.check_md5s()
 
     else:
-        LOG.info('Nothing to download.')
-
-    CONFIG.set('Settings', 'last_run', constants.YESTERDAY.strftime(constants.DATE_FORMAT))
-    CONFIG.write(open('config.ini', 'w'))
+        core.print_log('e621dl', 'info', 'Nothing to download.')
 
     sys.exit(0)

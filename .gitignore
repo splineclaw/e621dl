@@ -1,5 +1,29 @@
-.DS_Store
+# Recycle Bin
+$RECYCLE.BIN/
+
+# Windows thumbnail cache files
+Thumbs.db
+ehthumbs.db
+ehthumbs_vista.db
+
+# Config Files
 *.ini
+
+# Installer Files
+*.cab
+*.msi
+*.msm
+*.msp
+
+# Windows Shortcuts
+*.lnk
+
+####################################
+
+# Compiled Python
 *.pyc
-*.bat
+
+####################################
+
+# Repo Specific
 downloads/
