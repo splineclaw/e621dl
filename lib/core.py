@@ -78,7 +78,6 @@ def check_md5s():
 
     for root, dirs, files in os.walk('downloads'):
         for fileName in files:
-            verifiedHash = fileName[fileName.find('-') + 1:fileName.find('.')]
             md5lib = hashlib.md5()
 
             with open(os.path.join(root, fileName), 'rb') as openfile:
@@ -88,10 +87,9 @@ def check_md5s():
                         break
                     md5lib.update(data)
 
-            hashSubstring = re.finditer(r'(?=(\b[A-Fa-f0-9]{32}\b))', verifiedHash)
-            isValidHash = [match.group(1) for match in hashSubstring]
+            hashSubstring = re.findall(r'(?=(\b[A-Fa-f0-9]{32}\b))', fileName)
 
-            if not md5lib.hexdigest() == verifiedHash and isValidHash:
+            if not hashSubstring == [] and not md5lib.hexdigest() == hashSubstring[0]:
                 os.remove(os.path.join(root, fileName))
                 numBadHashes += 1
 

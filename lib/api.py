@@ -9,7 +9,7 @@ try:
 except(ImportError):
     exit('Required packages are missing. Run \"pip install -r requirements.txt\" to install them.')
 
-Post = namedtuple('Post', 'url id md5 ext tags')
+Post = namedtuple('Post', 'url id score md5 ext tags')
 UserTag = namedtuple('UserTag', 'alias_id name')
 AliasedTag = namedtuple('AliasedTag', 'name')
 
@@ -26,8 +26,8 @@ def get_posts(search_string, uploaded_after, page_number, max_results):
 
     posts = []
     for post in results:
-        posts.append(Post(post['file_url'], post['id'], post['md5'], post['file_ext'],
-        post['tags']))
+        posts.append(Post(post['file_url'], post['id'], post['score'],
+        post['md5'], post['file_ext'], post['tags']))
     return posts
 
 def get_alias(tag):
