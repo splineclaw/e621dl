@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 from itertools import repeat
 from multiprocessing import Pool, Manager, Process
@@ -38,6 +38,7 @@ def download_monitor(managed_list, total_items):
         update_progress(len(managed_list), total_items)
         if total_items == len(managed_list):
             return
+        sleep(0.05)
 
 def single_download(zipped_args):
     url_name_list, managed_list = zipped_args

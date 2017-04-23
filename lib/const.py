@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 DATE_FORMAT = "%Y-%m-%d"
 LOGGER_FORMAT = "%(name)-11s %(levelname)-8s %(message)s"
