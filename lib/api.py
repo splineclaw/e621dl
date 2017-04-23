@@ -4,21 +4,25 @@ from json import loads
 from collections import namedtuple
 from . import core
 
+try:
+    import requests
+except(ImportError):
+    exit('Required packages are missing. Run \"pip install -r requirements.txt\" to install them.')
+
 Post = namedtuple('Post', 'url id md5 ext tags')
 UserTag = namedtuple('UserTag', 'alias_id name')
 AliasedTag = namedtuple('AliasedTag', 'name')
 
-
 def get_posts(search_string, uploaded_after, page_number, max_results):
-    request = 'https://e621.net/post/index.json?' + \
+    search_url = 'https://e621.net/post/index.json?' + \
         'tags=' + search_string + \
         ' date:>' + str(uploaded_after) + \
         '&page=' + str(page_number) + \
         '&limit=' + str(max_results)
 
-    core.print_log('api', 'debug', 'Post request URL: \"' + request + '\".')
+    core.print_log('api', 'debug', 'Post request URL: \"' + search_url + '\".')
 
-    results = loads(core.SpoofOpen().open(request).read().decode())
+    results = requests.get(search_url).json()
 
     posts = []
     for post in results:
@@ -26,15 +30,11 @@ def get_posts(search_string, uploaded_after, page_number, max_results):
         post['tags']))
     return posts
 
-def download_post(url, filename):
-    with open(filename, 'wb') as outfile:
-        outfile.write(core.SpoofOpen().open(url).read())
-
 def get_alias(tag):
-    request = 'https://e621.net/tag_alias/index.json?query=' + tag
+    search_url = 'https://e621.net/tag_alias/index.json?query=' + tag
     lib.core.print_log('api', 'debug', 'Tag alias request URL: \"' + request + '\".')
 
-    results = loads(core.SpoofOpen().open(request).read().decode())
+    results = requests.get(search_url).json()
 
     user_tags = []
     for user_tag in results:
@@ -49,6 +49,7 @@ def get_alias(tag):
         request = 'https://e621.net/tag/show.json?id=' + str(user_tags[0].alias_id)
         core.print_log('api', 'debug', 'Tag official request URL: \"' + request + '\".')
 
+        # This will not work anymore. Use the requests module when you decide to fix tag aliasing.
         results = loads('[' + core.SpoofOpen().open(request).read() + ']'.decode())
 
         aliased_tags = []

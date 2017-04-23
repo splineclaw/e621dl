@@ -4,13 +4,9 @@ import argparse
 import logging
 import os
 import configparser
-from urllib.request import FancyURLopener
-from . import vars
+from . import const
 import hashlib
 import re
-
-class SpoofOpen(FancyURLopener):
-    version = 'e621dl / ' + vars.VERSION + ' / by Wulfre (GitHub)'
 
 def get_verbosity():
     parser = argparse.ArgumentParser(prog = 'e621dl', description = 'An automated e621 downloader.')
@@ -36,7 +32,7 @@ def print_log(logModule, logLevel, logMessage):
 
 def make_config(filename):
     with open(filename, 'w') as outfile:
-        outfile.write(vars.DEFAULT_CONFIG_TEXT)
+        outfile.write(const.DEFAULT_CONFIG_TEXT)
         print_log('config', 'info', 'New default file created: \"' + filename + '\".')
 
 def get_config(filename):

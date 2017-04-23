@@ -6,13 +6,13 @@ import sys
 import datetime
 from multiprocessing import freeze_support, cpu_count
 from collections import namedtuple
-from lib import vars, core, api, downloader
+from lib import const, core, api, downloader
 
 if __name__ == '__main__':
     freeze_support()
 
-    logging.basicConfig(level = core.get_verbosity(), format = vars.LOGGER_FORMAT, stream = sys.stderr)
-    core.print_log('e621dl', 'info', 'Running e621dl version ' + vars.VERSION + '.')
+    logging.basicConfig(level = core.get_verbosity(), format = const.LOGGER_FORMAT, stream = sys.stderr)
+    core.print_log('e621dl', 'info', 'Running e621dl version ' + const.VERSION + '.')
 
     config = core.get_config('config.ini')
 
@@ -48,7 +48,7 @@ if __name__ == '__main__':
     elif ordinal_check_date > datetime.date.today().toordinal() - 1:
         ordinal_check_date = datetime.date.today().toordinal() - 1
 
-    check_date = datetime.date.fromordinal(ordinal_check_date).strftime(vars.DATE_FORMAT)
+    check_date = datetime.date.fromordinal(ordinal_check_date).strftime(const.DATE_FORMAT)
 
     core.print_log('e621dl', 'info', 'Looking for new posts since ' + check_date + '.')
     print('')
@@ -81,14 +81,14 @@ if __name__ == '__main__':
             search_tags = group.tags
 
         while accumulating:
-            links_found = api.get_posts(search_tags, check_date, current_page, vars.MAX_RESULTS)
+            links_found = api.get_posts(search_tags, check_date, current_page, const.MAX_RESULTS)
 
             if not links_found:
                 accumulating = False
 
             else:
                 post_list += links_found
-                accumulating = len(links_found) == vars.MAX_RESULTS
+                accumulating = len(links_found) == const.MAX_RESULTS
                 current_page += 1
 
         if len(post_list) > 0:

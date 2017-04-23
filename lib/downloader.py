@@ -5,19 +5,28 @@ from multiprocessing import Pool, Manager, Process
 from time import sleep
 from . import core
 
+try:
+    import requests
+except(ImportError):
+    exit('Required packages are missing. Run \"pip install -r requirements.txt\" to install them.')
+
 def update_progress(downloaded, total):
     progress = float(downloaded) / float(total)
 
     BAR_LENGTH = 36
     status = ''
+
     if isinstance(progress, int):
         progress = float(progress)
+
     if progress < 0:
         progress = 0.0
         status = ' -- Stopped.\n'
+
     if progress >= 1:
         progress = 1.0
         status = ' -- Done.\n'
+
     completed = int(round(BAR_LENGTH * progress))
     progress_bar = '\rDownloading          [{}] {:6.2f}% {} {}'.format('>' * completed +
         ' ' * (BAR_LENGTH - completed), progress * 100, '(' + str(downloaded) + ' / ' + str(total) +
@@ -29,24 +38,19 @@ def download_monitor(managed_list, total_items):
         update_progress(len(managed_list), total_items)
         if total_items == len(managed_list):
             return
-        sleep(0.2)
 
 def single_download(zipped_args):
     url_name_list, managed_list = zipped_args
-    url, filename = url_name_list
+    url, path = url_name_list
 
-    spoof = core.SpoofOpen()
+    data = requests.get(url, stream = True)
 
-    try:
-        with open(filename, 'wb') as dest:
-            source = spoof.open(url)
-            dest.write(source.read())
+    with open(path, 'wb') as outfile:
+        for chunk in data:
+            outfile.write(chunk)
 
-        core.print_log('single_dl', 'debug', 'Downloading \"' + filename + '\".')
-        managed_list.append(filename)
-
-    except KeyboardInterrupt:
-        pass
+    core.print_log('single_dl', 'debug', 'Downloading \"' + path + '\".')
+    managed_list.append(path)
 
 def multi_download(url_name_list, num_threads):
     manager = Manager()
@@ -57,12 +61,15 @@ def multi_download(url_name_list, num_threads):
     monitor = Process(target = download_monitor, args = (managed_list, len(url_name_list)))
     monitor.start()
 
-    workers = Pool(processes = num_threads)
-    work = workers.map_async(single_download, list(zip(url_name_list, repeat(managed_list))))
+    pool = Pool(processes = num_threads)
+    work = pool.map_async(single_download, list(zip(url_name_list, repeat(managed_list))))
 
     try:
-        work.get(0xFFFF)
+        work.get(65535)
         monitor.join()
+        pool.close()
+        pool.join()
 
-    except KeyboardInterrupt:
-        exit()
+    except(KeyboardInterrupt):
+        pool.terminate()
+        pool.join()
