@@ -11,27 +11,16 @@ except(ImportError):
     exit('Required packages are missing. Run \"pip install -r requirements.txt\" to install them.')
 
 def update_progress(downloaded, total):
-    progress = float(downloaded) / float(total)
+    progress = downloaded / total
 
     BAR_LENGTH = 36
     status = ''
 
-    if isinstance(progress, int):
-        progress = float(progress)
-
-    if progress < 0:
-        progress = 0.0
-        status = ' -- Stopped.\n'
-
-    if progress >= 1:
-        progress = 1.0
-        status = ' -- Done.\n'
-
     completed = int(round(BAR_LENGTH * progress))
-    progress_bar = '\rDownloading          [{}] {:6.2f}% {} {}'.format('>' * completed +
-        ' ' * (BAR_LENGTH - completed), progress * 100, '(' + str(downloaded) + ' / ' + str(total) +
-        ')', status)
-    print(progress_bar, end=' ')
+    progress_bar = '\rDownloading          [{}] {}% {}'.format('>' * completed +
+        ' ' * (BAR_LENGTH - completed), int(round(progress * 100)), '(' + str(downloaded) + ' / ' +
+        str(total) + ')')
+    print(progress_bar, end='')
 
 def download_monitor(managed_list, total_items):
     while True:
