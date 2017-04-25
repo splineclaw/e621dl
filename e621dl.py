@@ -128,7 +128,7 @@ if __name__ == '__main__':
 
     if download_list:
         core.print_log('e621dl', 'info', 'Starting download of ' + str(len(download_list)) + ' files.')
-        downloader.multi_download(download_list)
+        downloader.download_posts(download_list)
         print('')
 
         core.print_log('e621dl', 'info', 'Checking downloads for damaged files.')
