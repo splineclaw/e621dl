@@ -31,19 +31,19 @@ def print_log(logModule, logLevel, logMessage):
     log = logging.getLogger(logModule)
     getattr(log, logLevel)(logMessage)
 
-def make_config(filename):
-    with open(filename, 'w') as outfile:
+def make_config(path):
+    with open(path, 'w') as outfile:
         outfile.write(const.DEFAULT_CONFIG_TEXT)
-        print_log('config', 'info', 'New default file created: \"' + filename + '\".')
+        print_log('config', 'info', 'New default file created: \"' + path + '\".')
 
-def get_config(filename):
+def get_config(path):
     config = configparser.ConfigParser()
 
-    if not os.path.isfile(filename):
+    if not os.path.isfile(path):
         print_log('config', 'error', 'No config file found.')
-        make_config(filename)
+        make_config(path)
 
-    with open(filename, 'r') as infile:
+    with open(path, 'r') as infile:
         config.read_file(infile)
         return config
 
@@ -62,39 +62,39 @@ def substitute_illegals(char):
     illegals = ['\\', ':', '*', '?', '\"', '<', '>', '|', ' ']
     return '_' if char in illegals else char
 
-def make_path(dirName, post):
-    cleanDirName = ''.join([substitute_illegals(char) for char in dirName]).lower()
+def make_path(dir_name, post):
+    clean_dir_name = ''.join([substitute_illegals(char) for char in dir_name]).lower()
 
-    if not os.path.isdir('downloads/' + cleanDirName):
-        os.makedirs('downloads/' + cleanDirName)
+    if not os.path.isdir('downloads/' + clean_dir_name):
+        os.makedirs('downloads/' + clean_dir_name)
 
-    path = 'downloads/' + cleanDirName + '/' + str(post.id) + '-' + \
+    path = 'downloads/' + clean_dir_name + '/' + str(post.id) + '-' + \
     post.md5 + '.' + post.ext
 
     return path
 
 def check_md5s():
     BYTE_SIZE = 65536
-    numBadHashes = 0
+    bad_hashes = 0
 
     for root, dirs, files in os.walk('downloads'):
-        for fileName in files:
+        for path in files:
             md5lib = hashlib.md5()
 
-            with open(os.path.join(root, fileName), 'rb') as openfile:
+            with open(os.path.join(root, path), 'rb') as infile:
                 while True:
-                    data = openfile.read(BYTE_SIZE)
+                    data = infile.read(BYTE_SIZE)
                     if not data:
                         break
                     md5lib.update(data)
 
-            hashSubstring = re.findall(r'(?=(\b[A-Fa-f0-9]{32}\b))', fileName)
+            hash_substring = re.findall(r'(?=(\b[A-Fa-f0-9]{32}\b))', path)
 
-            if not hashSubstring == [] and not md5lib.hexdigest() == hashSubstring[0]:
-                os.remove(os.path.join(root, fileName))
-                numBadHashes += 1
+            if not hash_substring == [] and not md5lib.hexdigest() == hash_substring[0]:
+                os.remove(os.path.join(root, path))
+                bad_hashes += 1
 
-    if numBadHashes > 0:
-        print_log('e621dl', 'info', 'Removed ' + str(numBadHashes) + ' damaged files.')
+    if bad_hashes > 0:
+        print_log('e621dl', 'info', 'Removed ' + str(bad_hashes) + ' damaged files.')
     else:
         print_log('e621dl', 'info', 'No damaged files were found.')

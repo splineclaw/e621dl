@@ -11,8 +11,9 @@ except ImportError:
     exit('Required packages are missing. Run \"pip install -r requirements.txt\" to install them.')
 
 def update_progress(downloaded, total):
-    progress = downloaded / total
     BAR_LENGTH = 36
+
+    progress = downloaded / total
     completed = int(round(BAR_LENGTH * progress))
 
     progress_bar = '\rDownloading          [{}] {}% {}'.format('>' * completed +

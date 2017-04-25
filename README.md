@@ -49,7 +49,7 @@ One side effect of the workaround used to search an unlimited number tags is tha
 
 ## [Optional] Add blacklisted tags to the config file.
 
-Add any tags for posts you would like to avoid downloading to the blacklist section of the `config.ini` file. Meta tags `:`, negative tags `:`, operational tags `~`, and wildcard tags `*` will currently break the script, as they are not filtered out of the blacklist, so do not use them in this section.
+Add any tags for posts you would like to avoid downloading to the blacklist section of the `config.ini` file. Meta tags `:`, negative tags `-`, operational tags `~`, and wildcard tags `*` will currently break the script, as they are not filtered out of the blacklist, so do not use them in this section.
 
 Commas should be used to separate tags.
 
