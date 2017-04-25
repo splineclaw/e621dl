@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 
 import argparse
+import configparser
+import hashlib
 import logging
 import os
-import configparser
-from . import const
-import hashlib
 import re
+
+from . import const
 
 def get_verbosity():
     parser = argparse.ArgumentParser(prog = 'e621dl', description = 'An automated e621 downloader.')

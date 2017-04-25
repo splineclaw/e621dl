@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 
+import datetime
 import logging
 import os
 import sys
-import datetime
-from multiprocessing import freeze_support, cpu_count
 from collections import namedtuple
+from multiprocessing import freeze_support
+
 from lib import const, core, api, downloader
 
 if __name__ == '__main__':
@@ -127,7 +128,7 @@ if __name__ == '__main__':
 
     if download_list:
         core.print_log('e621dl', 'info', 'Starting download of ' + str(len(download_list)) + ' files.')
-        downloader.multi_download(download_list, cpu_count())
+        downloader.multi_download(download_list)
         print('')
 
         core.print_log('e621dl', 'info', 'Checking downloads for damaged files.')

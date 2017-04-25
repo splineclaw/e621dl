@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 
-from json import loads
 from collections import namedtuple
+
 from . import core
 
 try:
     import requests
-except(ImportError):
+except ImportError:
     exit('Required packages are missing. Run \"pip install -r requirements.txt\" to install them.')
 
 Post = namedtuple('Post', 'url id score md5 ext tags')
@@ -14,15 +14,15 @@ UserTag = namedtuple('UserTag', 'alias_id name')
 AliasedTag = namedtuple('AliasedTag', 'name')
 
 def get_posts(search_string, uploaded_after, page_number, max_results):
-    search_url = 'https://e621.net/post/index.json?' + \
+    request = 'https://e621.net/post/index.json?' + \
         'tags=' + search_string + \
         ' date:>' + str(uploaded_after) + \
         '&page=' + str(page_number) + \
         '&limit=' + str(max_results)
 
-    core.print_log('api', 'debug', 'Post request URL: \"' + search_url + '\".')
+    core.print_log('api', 'debug', 'Post request URL: \"' + request + '\".')
 
-    results = requests.get(search_url).json()
+    results = requests.get(request).json()
 
     posts = []
     for post in results:
@@ -31,10 +31,10 @@ def get_posts(search_string, uploaded_after, page_number, max_results):
     return posts
 
 def get_alias(tag):
-    search_url = 'https://e621.net/tag_alias/index.json?query=' + tag
-    lib.core.print_log('api', 'debug', 'Tag alias request URL: \"' + request + '\".')
+    request = 'https://e621.net/tag_alias/index.json?query=' + tag
+    core.print_log('api', 'debug', 'Tag alias request URL: \"' + request + '\".')
 
-    results = requests.get(search_url).json()
+    results = requests.get(request).json()
 
     user_tags = []
     for user_tag in results:
