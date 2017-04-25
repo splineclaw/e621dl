@@ -5,12 +5,10 @@ import logging
 import os
 import sys
 from collections import namedtuple
-from multiprocessing import freeze_support
 
 from lib import const, core, api, downloader
 
 if __name__ == '__main__':
-    freeze_support()
 
     logging.basicConfig(level = core.get_verbosity(), format = const.LOGGER_FORMAT, stream = sys.stderr)
     core.print_log('e621dl', 'info', 'Running e621dl version ' + const.VERSION + '.')

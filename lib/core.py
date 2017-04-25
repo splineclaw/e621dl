@@ -27,9 +27,9 @@ def get_verbosity():
     else:
         return logging.INFO
 
-def print_log(logModule, logLevel, logMessage):
-    log = logging.getLogger(logModule)
-    getattr(log, logLevel)(logMessage)
+def print_log(log_module, log_level, log_message):
+    log = logging.getLogger(log_module)
+    getattr(log, log_level)(log_message)
 
 def make_config(path):
     with open(path, 'w') as outfile:
