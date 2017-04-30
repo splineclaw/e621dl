@@ -7,7 +7,8 @@ import logging
 import os
 import re
 
-from . import const
+from . import constants
+
 
 def get_verbosity():
     parser = argparse.ArgumentParser(prog = 'e621dl', description = 'An automated e621 downloader.')
@@ -33,7 +34,7 @@ def print_log(log_module, log_level, log_message):
 
 def make_config(path):
     with open(path, 'w') as outfile:
-        outfile.write(const.DEFAULT_CONFIG_TEXT)
+        outfile.write(constants.DEFAULT_CONFIG_TEXT)
         print_log('config', 'info', 'New default file created: \"' + path + '\".')
 
 def get_config(path):
@@ -98,3 +99,15 @@ def check_md5s():
         print_log('e621dl', 'info', 'Removed ' + str(bad_hashes) + ' damaged files.')
     else:
         print_log('e621dl', 'info', 'No damaged files were found.')
+
+def update_progressbar(partial, total):
+    BAR_LENGTH = 36
+
+    progress = partial / total
+    completed_segments = int(round(BAR_LENGTH * progress))
+
+    progress_bar = '\rDownloading          [{}] {}% {}'.format('>' * completed_segments +
+        ' ' * (BAR_LENGTH - completed_segments), int(round(progress * 100)),
+        '(' + str(partial) + ' / ' + str(total) + ')')
+
+    print(progress_bar, end='')
