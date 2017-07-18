@@ -41,7 +41,7 @@ These errors are normal behavior for a first run, and should not raise any alarm
 
 Create sections in the `config.ini` to specify which posts you would like to download. In the default config file, an example is provided for you. Each section will have its own directory inside the downloads folder.
 
-The following characters are not allowed in section names: `\`, `:`, `*`, `?`, `"`, `<`, `>`, `|`, ` ` as they can cause issues in windows file directories. If any of these characters are used, they will be replaced with the `_` character. The `/` character _is_ allowed to be used in section names, but it will be understood as a sub-directory. This may be useful to some users for organization. For example: `[Canine/Fox]` and `[Canine/Wolf]`, and `[Feline/Tiger]` and `[Feline/Lion]`
+The following characters are not allowed in section names: `\`, `:`, `*`, `?`, `"`, `<`, `>`, `|`, and ` ` as they can cause issues in windows file directories. If any of these characters are used, they will be replaced with the `_` character. The `/` character _is_ allowed to be used in section names, but it will be understood as a sub-directory. This may be useful to some users for organization. For example: separating `[Canine/Fox]` and `[Canine/Wolf]`, and separating `[Feline/Tiger]` and `[Feline/Lion]`
 
 Commas should be used to separate tags and ratings.
 
@@ -53,11 +53,11 @@ Add any tags for posts you would like to avoid downloading to the blacklist sect
 
 Commas should be used to separate tags.
 
-_Check your tags against the [e621 tag list](https://e621.net/tag_alias/) and manually convert any tags for content you absolutely do not want to see. Otherwise, it would be greatly appreciated that you test the automatic tag conversion and report any issues._
+_Please check your blacklist tags against the [e621 tag list](https://e621.net/tag_alias/) for content you absolutely do not want to see. At this time, I do not have a reliable automatic check._
 
 ## [Optional] Modify the settings in the config file.
 
-Most users will not need to modify the settings section of the `config.ini` file, but feel free to edit it to your liking after reading the description, and acceptable values for each key.
+The settings section of the `config.ini` is designed to be easily modified and difficult to break by any user, as much of the information needed by **e621dl** is dynamically taken from the computer it is being run on. Feel free to edit it to your liking after reading the description, and acceptable values for each key.
 
 ### Config Keys, Values, and Descriptions
 
