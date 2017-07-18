@@ -9,7 +9,6 @@ import re
 
 from . import constants
 
-
 def get_verbosity():
     parser = argparse.ArgumentParser(prog = 'e621dl', description = 'An automated e621 downloader.')
 
@@ -106,7 +105,7 @@ def update_progressbar(partial, total):
     progress = partial / total
     completed_segments = int(round(BAR_LENGTH * progress))
 
-    progress_bar = '\rDownloading          [{}] {}% {}'.format('>' * completed_segments +
+    progress_bar = '\rDownloading          |{}| {}% {}'.format('█' * completed_segments +
         ' ' * (BAR_LENGTH - completed_segments), int(round(progress * 100)),
         '(' + str(partial) + ' / ' + str(total) + ')')
 

@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
 
+#     __
+# ___( o)> i am the wise duck of code, your code will compile without errors, but only if you say
+# \ <_. )  "compile well ducko"
+#  `---'
+
 import datetime
 import logging
 import os
@@ -34,16 +39,19 @@ if __name__ == '__main__':
         if section == 'Settings':
             pass
         elif section == 'Blacklist':
-            for tag in config.get('Blacklist', 'tags').replace(',', '').split():
+            for tag in config.get('Blacklist', 'tags').replace(',', '').strip().split():
                 blacklist.append(tag)
         else:
+            section_tags = ""
+            section_score = ""
+            section_ratings = ""
             for option, value in config.items(section):
                 if option == 'tags':
-                    section_tags = value.replace(',', '')
+                    section_tags = value.replace(',', '').strip()
                 elif option == 'min_score':
                     section_score = int(value)
                 elif option == 'ratings':
-                    section_ratings = value.replace(',', '')
+                    section_ratings = value.replace(',', '').strip()
 
             tag_groups.append(GROUP(section_tags, section_score, section_ratings, section))
 
@@ -64,8 +72,7 @@ if __name__ == '__main__':
 
     with requests.Session() as session:
         for group in tag_groups:
-            local.print_log('e621dl', 'info', 'Group \"' + group.directory + '\" detected.')
-            local.print_log('e621dl', 'info', 'Checking for new posts tagged: \"' + group.tags.replace(' ', ', ') + '\".')
+            local.print_log('e621dl', 'info', 'Group \"' + group.directory + '\" detected, checking for new posts tagged: \"' + group.tags.replace(' ', ', ') + '\".')
 
             accumulating = True
             current_page = 1
@@ -81,7 +88,6 @@ if __name__ == '__main__':
                 for tag in separated_tags:
                     if tag not in search_tags.split():
                         tag_overflow.append(tag)
-
             else:
                 search_tags = group.tags
 
@@ -90,18 +96,17 @@ if __name__ == '__main__':
 
                 if not search_results:
                     accumulating = False
-
                 else:
                     posts_found += search_results
                     accumulating = len(search_results) == constants.MAX_RESULTS
                     current_page += 1
 
             if len(posts_found) > 0:
-                links_missing_tags = 0
-                links_blacklisted = 0
-                links_low_score = 0
-                links_wrong_rating = 0
-                links_on_disk = 0
+                bad_tags = 0
+                blacklisted = 0
+                bad_score = 0
+                bad_rating = 0
+                on_disk = 0
                 will_download = 0
 
                 for i, post in enumerate(posts_found):
@@ -111,35 +116,35 @@ if __name__ == '__main__':
                     current_tags = post.tags.split()
 
                     if post.rating not in separated_ratings:
-                        links_wrong_rating += 1
+                        bad_rating += 1
                         local.print_log('e621dl', 'debug', 'Item ' + str(i) + ' was skipped. Has the wrong rating.')
-
                     elif int(post.score) < group.score:
-                        links_low_score += 1
+                        bad_score += 1
                         local.print_log('e621dl', 'debug', 'Item ' + str(i) + ' was skipped. Has a lower score than requested.')
-
                     elif len(separated_tags) > 5 and not list(set(tag_overflow) & set(current_tags)):
-                        links_missing_tags += 1
+                        bad_tags += 1
                         local.print_log('e621dl', 'debug', 'Item ' + str(i) + ' was skipped. Missing a requested tag.')
-
                     elif list(set(blacklist) & set(current_tags)):
-                        links_blacklisted += 1
+                        blacklisted += 1
                         local.print_log('e621dl', 'debug', 'Item ' + str(i) + ' was skipped. Contains a blacklisted tag.')
-
                     elif os.path.isfile(filename):
-                        links_on_disk += 1
+                        on_disk += 1
                         local.print_log('e621dl', 'debug', 'Item ' + str(i) + ' was skipped. Already downloaded previously.')
-
                     else:
                         local.print_log('e621dl', 'debug', 'Item ' + str(i) + ' will be downloaded.')
                         download_list.append((post.url, filename))
                         will_download += 1
 
-                local.print_log('e621dl', 'info', str(will_download) + ' new files. (' +
-                str(links_wrong_rating) + ' wrong rating, ' + str(links_low_score) + ' low score, ' + str(len(posts_found)) + ' found, ' + str(links_missing_tags) + ' missing tags, ' + str(links_blacklisted) + ' blacklisted, ' + str(links_on_disk) + ' duplicate.)')
+                # I probably should not be using hard-coded spacing in here. Maybe I'll fix it later.
+                local.print_log('e621dl', 'info', str(will_download) + ' new files.\n' +
+                '                     ' + str(len(posts_found)) + ' total files found.\n' +
+                '                     ' + str(bad_rating) + ' have an unwanted rating.\n' +
+                '                     ' + str(bad_score) + ' have a low score.\n' +
+                '                     ' + str(bad_tags) + ' are missing tags.\n' +
+                '                     ' + str(blacklisted) + ' are blacklisted.\n' +
+                '                     ' + str(on_disk) + ' have been previously downloaded.')
 
                 print('')
-
             else:
                 local.print_log('e621dl', 'info', '0 new files.')
                 print('')
@@ -149,9 +154,9 @@ if __name__ == '__main__':
             remote.download_posts(download_list, session)
             print('')
 
-            local.print_log('e621dl', 'info', 'Checking downloads for damaged files.')
-            local.check_md5s()
-
+            # Make the damaged file check more efficient.
+            #local.print_log('e621dl', 'info', 'Checking downloads for damaged files.')
+            #local.check_md5s()
         else:
             local.print_log('e621dl', 'info', 'Nothing to download.')
 
