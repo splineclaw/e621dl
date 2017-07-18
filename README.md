@@ -1,36 +1,34 @@
 # What is **e621dl**?
 
-**e621dl** is an automated script, originally by [**@wwyaiykycnf**](https://github.com/wwyaiykycnf), which downloads content from e621.net. It can be used to create a local mirror of your favorite searches, and keep these searches up to date as new files are uploaded.
+**e621dl** is an automated script, originally by [**@wwyaiykycnf**](https://github.com/wwyaiykycnf), which downloads images from e621.net. It can be used to create a local mirror of your favorite searches, and keep these searches up to date as new files are uploaded.
 
 # How does **e621dl** work?
 
-Put very simply, when **e621dl** starts, it determines the following:
+Put very simply, when **e621dl** starts, it determines the following based on the `config.ini` file:
 
-- Which tags you would like to avoid seeing by reading the blacklist section in `config.ini`.
-- Which searches you would like to perform by reading your tag group sections in `config.ini`.
-- The last time it was run by reading the settings section in `config.ini`.
+- Which tags you would like to avoid seeing by reading the blacklist section.
+- Which searches you would like to perform by reading your tag group sections.
+- How far back to look for posts by reading your settings section.
 
-Once it knows these things, it goes through the searches one by one, and downloads _only_ content that matches your search and blacklist request, and has been uploaded since the last time it was run.
+Once it knows these things, it goes through the searches one by one, and downloads _only_ content that matches your search request, and has passed through all specified filters.
 
-# Installing **e621dl**
+# Installing and Setting Up **e621dl**
 
 - Download and install [the latest release of Python 3](https://www.python.org/downloads/).
 - Download [the latest release of **e621dl**](https://github.com/wulfre/e621dl/releases/latest).
-
-  - Decompress the archive in any directory you would like.
+  - Decompress the archive into any directory you would like.
+- Download and install the required packages from the Python Package Index by opening your terminal/command line in the directory you decompressed e621dl into and running the command `pip install -r requirements.txt`.
 
 # Running **e621dl**
 
-- Open the terminal/command line in the directory you installed e621dl, and run `e621dl.py`
-
-  - You may need to run the command as `python e621dl.py` if python is not in your path.
+- Open your terminal/command line in the directory you decompressed e621dl into, and run the command `python e621dl.py`.
 
 ## First-Time Run
 
 The first time you run **e621dl**, you should see something similar to the following:
 
 ```
-e621dl      INFO     Running e621dl version 3.0.2 -- Forked from 2.4.6.
+e621dl      INFO     Running e621dl version X.X.X -- Forked from 2.4.6.
 config      ERROR    No config file found.
 config      INFO     New default file created: "config.ini".
 tags        ERROR    Please add at least one tag group to "config.ini".
@@ -39,17 +37,19 @@ e621dl      INFO     Error(s) occurred during initialization, see above for more
 
 These errors are normal behavior for a first run, and should not raise any alarm. **e621dl** is telling you that it was unable to find the _config_, _tags_, or _blacklist_ files, nor the _downloads_ folder, so it created them.
 
-## Add searches to the config file.
+## Add search groups to the config file.
 
-Add any tags or meta-tags for posts you would like to download their own sections in the `config.ini` file an example is provided for you. Each search will have its own directory inside the downloads folder.
+Create sections in the `config.ini` to specify which posts you would like to download. In the default config file, an example is provided for you. Each section will have its own directory inside the downloads folder.
 
-Commas should be used to separate tags.
+The following characters are not allowed in section names: `\`, `:`, `*`, `?`, `"`, `<`, `>`, `|`, ` ` as they can cause issues in windows file directories. If any of these characters are used, they will be replaced with the `_` character. The `/` character _is_ allowed to be used in section names, but it will be understood as a sub-directory. This may be useful to some users for organization. For example: `[Canine/Fox]` and `[Canine/Wolf]`, and `[Feline/Tiger]` and `[Feline/Lion]`
+
+Commas should be used to separate tags and ratings.
 
 One side effect of the workaround used to search an unlimited number tags is that you may only use up to 5 meta tags `:`, negative tags `-`, operational tags `~`, or wildcard tags `*` per group, and they must be the first 5 items in the group. See [the e621 cheatsheet](https://e621.net/help/show/cheatsheet) for more information on these special types of tags.
 
 ## [Optional] Add blacklisted tags to the config file.
 
-Add any tags for posts you would like to avoid downloading to the blacklist section of the `config.ini` file. Meta tags `:`, negative tags `-`, operational tags `~`, and wildcard tags `*` will currently break the script, as they are not filtered out of the blacklist, so do not use them in this section.
+Add any tags for posts you would like to avoid downloading to the blacklist section of the `config.ini` file. Meta tags `:`, negative tags `-`, operational tags `~`, and wildcard tags `*` will potentially break the script, as they are currently not filtered out of the blacklist, so do not use them in this section.
 
 Commas should be used to separate tags.
 
@@ -63,36 +63,34 @@ Most users will not need to modify the settings section of the `config.ini` file
 
 Key                   | Acceptable Values | Description
 --------------------- |  -----------------| ----------------------------------------------------------------------------------
-last_run              |Date `YYYY-MM-DD` | The last day **e621dl** was run. You may edit this freely to download older posts.
+days_to_check         |Integer            | How many days from the past to check for new posts. You may edit this freely to download posts from as early as you would like.
 
 ## Normal Operation
 
 Once you have added at least one group to the tags file, you should see something similar to this when you run **e621dl**:
 
 ```
-e621dl      INFO     Running e621dl version 3.1.1 -- Forked from 2.4.6.
+e621dl      INFO     Running e621dl version X.X.X -- Forked from 2.4.6.
 e621dl      INFO     Parsing config.
 
-e621dl      INFO     Looking for new posts since 2017-01-24.
+e621dl      INFO     Looking for new posts since YYYY-MM-DD.
 
-e621dl      INFO     Checking for new posts tagged: "cute, cat".
-e621dl      INFO     3 new files. (8 found, 2 missing tags, 0 blacklisted, 3 duplicate.)
+e621dl      INFO     Group "Canine/Fox" detected, checking for new posts tagged: "fox, feral".
+e621dl      INFO     19 new files.
+                     37 total files found.
+                     10 have an unwanted rating.
+                     3 have a low score.
+                     0 are missing tags.
+                     1 are blacklisted.
+                     4 have been previously downloaded.
 
-e621dl      INFO     Checking for new posts tagged: "cute, dog".
-e621dl      INFO     0 new files. (6 found, 0 missing tags, 1 blacklisted, 5 duplicate.)
-
-e621dl      INFO     Starting download of 3 files.
-Downloading          [>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>] 100.00% (3 / 3)  -- Done.
-
-e621dl      INFO     Checking downloads for damaged files.
-e621dl      INFO     No damaged files were found.
+e621dl      INFO     Starting download of 19 files.
+Downloading          |████████████████████████████████████| 100% (19 / 19)
 ```
-
-There is quite a bit of information here. Since last time **e621dl** was run on 2014-06-27, there have been 8 uploads that match the search "cat". One post did not contain every tag which we specified. This is because e621 will only accept 5 initial tags and any additional tags are checked by e621dl. 1 post has a tag that was in our blacklist, so it will be skipped. 2 posts have already been downloaded in a previous run, so they will also be skipped. The 4 remaining posts will be downloaded and added the downloads folder. Once they have been downloaded, **e621dl** updates its last run date to the day before it was run, 2014-11-26, and is ready for its next use.
 
 # Automation of **e621dl**
 
-It should be recognized that **e621dl**, as a script, can be scheduled to run nightly, keeping the user's local collections always up-to-date, however, the methods for doing this are dependent on the user's platform, and are outside the scope of this guide.
+It should be recognized that **e621dl**, as a script, can be scheduled to run as often as you like, keeping the your local collections always up-to-date, however, the methods for doing this are dependent on your platform, and are outside the scope of this quick-guide.
 
 # Feedback and Requests
 
@@ -100,8 +98,8 @@ If you have any ideas on how to make this script run better, or for features you
 
 # Donations
 
-Since this script was initially written by [**@wwyaiykycnf**](https://github.com/wwyaiykycnf) I will leave their donation section as it was before I forked the repository.
+_Since this script was initially written by [**@wwyaiykycnf**](https://github.com/wwyaiykycnf) I will leave their donation section as it was before I forked the repository._
 
 If you've benefitted from this _free_ project, why not [buy me something on Amazon?](http://amzn.com/w/20RZIUHXLO6R4) There's tons of cheap bullshit on there I would totally get a kick out of owning.
 
-Alternatively, drop me an email at wwyaiykycnf+features@gmail.com and say thanks. Your support (monetary or not) provides me the motivation to keep fixing bugs and adding new features, so thanks for thinking of me! ng of me! ng of me! ng of me! ng of me!
+Alternatively, drop me an email at wwyaiykycnf+features@gmail.com and say thanks. Your support (monetary or not) provides me the motivation to keep fixing bugs and adding new features, so thanks for thinking of me!

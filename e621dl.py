@@ -25,11 +25,11 @@ if __name__ == '__main__':
 
     config = local.get_config('config.ini')
 
-    if local.validate_tags(config):
+    if local.tags_valid(config):
         local.print_log('e621dl', 'info', 'Error(s) occurred during initialization, see above for more information.')
         sys.exit(-1)
 
-    GROUP = namedtuple('Group', 'tags score ratings directory')
+    Group = namedtuple('Group', 'tags score ratings directory')
     blacklist = []
     tag_groups = []
 
@@ -42,9 +42,9 @@ if __name__ == '__main__':
             for tag in config.get('Blacklist', 'tags').replace(',', '').strip().split():
                 blacklist.append(tag)
         else:
-            section_tags = ""
-            section_score = ""
-            section_ratings = ""
+            section_tags = ''
+            section_score = ''
+            section_ratings = ''
             for option, value in config.items(section):
                 if option == 'tags':
                     section_tags = value.replace(',', '').strip()
@@ -53,7 +53,7 @@ if __name__ == '__main__':
                 elif option == 'ratings':
                     section_ratings = value.replace(',', '').strip()
 
-            tag_groups.append(GROUP(section_tags, section_score, section_ratings, section))
+            tag_groups.append(Group(section_tags, section_score, section_ratings, section))
 
     print('')
 

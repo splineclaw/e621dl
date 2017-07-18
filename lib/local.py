@@ -47,7 +47,7 @@ def get_config(path):
         config.read_file(infile)
         return config
 
-def validate_tags(config):
+def tags_valid(config):
     sections = 0
     for _ in config.sections():
         sections += 1
@@ -74,7 +74,6 @@ def make_path(dir_name, post):
     return path
 
 def check_md5s():
-    BYTE_SIZE = 65536
     bad_hashes = 0
 
     for root, dirs, files in os.walk('downloads'):
@@ -83,7 +82,7 @@ def check_md5s():
 
             with open(os.path.join(root, path), 'rb') as infile:
                 while True:
-                    data = infile.read(BYTE_SIZE)
+                    data = infile.read(65536)
                     if not data:
                         break
                     md5lib.update(data)
