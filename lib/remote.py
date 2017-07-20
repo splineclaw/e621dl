@@ -7,6 +7,7 @@ from . import local
 
 try:
     import requests
+    from unidecode import unidecode
 except ImportError:
     exit('Required packages are missing. Run \"pip install -r requirements.txt\" to install them.')
 
@@ -26,7 +27,7 @@ def get_posts(search_string, uploaded_after, page_number, max_results, session):
     posts = []
     for post in results:
         posts.append(Post(post['file_url'], post['id'], post['md5'],
-        post['file_ext'], post['tags'], post['rating'], post['score']))
+        post['file_ext'], unidecode(post['tags']), post['rating'], post['score']))
     return posts
 
 def download_posts(url_name_list, session):

@@ -15,11 +15,11 @@ from lib import constants, local, remote
 
 try:
     import requests
+    from unidecode import unidecode
 except ImportError:
     exit('Required packages are missing. Run \"pip install -r requirements.txt\" to install them.')
 
 if __name__ == '__main__':
-
     logging.basicConfig(level = local.get_verbosity(), format = constants.LOGGER_FORMAT, stream = sys.stderr)
     local.print_log('e621dl', 'info', 'Running e621dl version ' + constants.VERSION + '.')
 
@@ -40,7 +40,7 @@ if __name__ == '__main__':
             pass
         elif section == 'Blacklist':
             for tag in config.get('Blacklist', 'tags').replace(',', '').strip().split():
-                blacklist.append(tag)
+                blacklist.append(unidecode(tag))
         else:
             section_tags = ''
             section_score = ''
@@ -53,7 +53,7 @@ if __name__ == '__main__':
                 elif option == 'ratings':
                     section_ratings = value.replace(',', '').strip()
 
-            tag_groups.append(Group(section_tags, section_score, section_ratings, section))
+            tag_groups.append(Group(unidecode(section_tags), section_score, section_ratings, section))
 
     print('')
 

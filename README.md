@@ -15,7 +15,7 @@ Once it knows these things, it goes through the searches one by one, and downloa
 # Installing and Setting Up **e621dl**
 
 - Download and install [the latest release of Python 3](https://www.python.org/downloads/).
-- Download [the latest release of **e621dl**](https://github.com/wulfre/e621dl/releases/latest).
+- Download [the latest release of **e621dl**](https://github.com/wulfre/e621dl/releases).
   - Decompress the archive into any directory you would like.
 - Download and install the required packages from the Python Package Index by opening your terminal/command line in the directory you decompressed e621dl into and running the command `pip install -r requirements.txt`.
 
