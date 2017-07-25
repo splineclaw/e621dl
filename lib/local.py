@@ -48,15 +48,12 @@ def get_config(path):
         return config
 
 def tags_valid(config):
-    sections = 0
-    for _ in config.sections():
-        sections += 1
+    for section in config.sections():
 
-    if sections < 3:
-        print_log('tags', 'error', 'Please add at least one tag group to \"config.ini\".')
-        return True
-    else:
-        return False
+        if not section.lower() == 'blacklist' or 'settings':
+            return True
+
+    return False
 
 def substitute_illegals(char):
     illegals = ['\\', ':', '*', '?', '\"', '<', '>', '|', ' ']
@@ -68,8 +65,8 @@ def make_path(dir_name, post):
     if not os.path.isdir('downloads/' + clean_dir_name):
         os.makedirs('downloads/' + clean_dir_name)
 
-    path = 'downloads/' + clean_dir_name + '/' + str(post.id) + '-' + \
-    post.md5 + '.' + post.ext
+    path = 'downloads/' + clean_dir_name + '/' + str(post[0]) + '-' + \
+    post[1] + '.' + post[2]
 
     return path
 
@@ -97,15 +94,3 @@ def check_md5s():
         print_log('e621dl', 'info', 'Removed ' + str(bad_hashes) + ' damaged files.')
     else:
         print_log('e621dl', 'info', 'No damaged files were found.')
-
-def update_progressbar(partial, total):
-    BAR_LENGTH = 36
-
-    progress = partial / total
-    completed_segments = int(round(BAR_LENGTH * progress))
-
-    progress_bar = '\rDownloading          |{}| {}% {}'.format('█' * completed_segments +
-        ' ' * (BAR_LENGTH - completed_segments), int(round(progress * 100)),
-        '(' + str(partial) + ' / ' + str(total) + ')')
-
-    print(progress_bar, end='')

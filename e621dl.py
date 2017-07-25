@@ -9,55 +9,57 @@ import datetime
 import logging
 import os
 import sys
-from collections import namedtuple
+from itertools import count
 
 from lib import constants, local, remote
 
 try:
     import requests
     from unidecode import unidecode
+    import colorama
 except ImportError:
     exit('Required packages are missing. Run \"pip install -r requirements.txt\" to install them.')
 
 if __name__ == '__main__':
+    colorama.init()
+
     logging.basicConfig(level = local.get_verbosity(), format = constants.LOGGER_FORMAT, stream = sys.stderr)
     local.print_log('e621dl', 'info', 'Running e621dl version ' + constants.VERSION + '.')
 
     config = local.get_config('config.ini')
 
-    if local.tags_valid(config):
+    if not local.tags_valid(config):
         local.print_log('e621dl', 'info', 'Error(s) occurred during initialization, see above for more information.')
         sys.exit(-1)
 
-    Group = namedtuple('Group', 'tags score ratings directory')
     blacklist = []
     tag_groups = []
 
-    local.print_log('e621dl', 'info', 'Parsing config.')
-
     for section in config.sections():
-        if section == 'Settings':
+        if section.lower() == 'settings':
             pass
-        elif section == 'Blacklist':
-            for tag in config.get('Blacklist', 'tags').replace(',', '').strip().split():
-                blacklist.append(unidecode(tag))
+
+        elif section.lower() == 'blacklist':
+            blacklist = unidecode(config.get(section, 'tags').replace(',', '').strip()).lower().split()
+
         else:
-            section_tags = ''
-            section_score = ''
-            section_ratings = ''
+            section_tags = []
+            section_score = -999999
+            section_ratings = ['s']
             for option, value in config.items(section):
                 if option == 'tags':
-                    section_tags = value.replace(',', '').strip()
+                    section_tags = unidecode(value.replace(',', '').strip()).lower().split()
                 elif option == 'min_score':
                     section_score = int(value)
                 elif option == 'ratings':
-                    section_ratings = value.replace(',', '').strip()
+                    section_ratings = value.replace(',', '').strip().lower().split()
 
-            tag_groups.append(Group(unidecode(section_tags), section_score, section_ratings, section))
+            tag_groups.append([section, section_tags, section_ratings, section_score])
 
     print('')
 
     ordinal_check_date = datetime.date.today().toordinal() - int((config.get('Settings', 'days_to_check')))
+
     if ordinal_check_date < 1:
         ordinal_check_date = 1
     elif ordinal_check_date > datetime.date.today().toordinal() - 1:
@@ -65,99 +67,73 @@ if __name__ == '__main__':
 
     check_date = datetime.date.fromordinal(ordinal_check_date).strftime(constants.DATE_FORMAT)
 
-    local.print_log('e621dl', 'info', 'Looking for new posts since ' + check_date + '.')
+    local.print_log('e621dl', 'info', 'Checking for new posts since ' + check_date + ' (' + str(config.get('Settings', 'days_to_check')) + ' days).')
+
     print('')
 
-    download_list = []
+    # group[0] = directory
+    # group[1] = tags
+    # group[2] = ratings
+    # group[3] = score
 
     with requests.Session() as session:
         for group in tag_groups:
-            local.print_log('e621dl', 'info', 'Group \"' + group.directory + '\" detected, checking for new posts tagged: \"' + group.tags.replace(' ', ', ') + '\".')
+            local.print_log('e621dl', 'info', 'Checking group \"' + group[0] + '\".')
 
-            accumulating = True
-            current_page = 1
-            posts_found = []
-            tag_overflow = []
+            on_disk = 0
+            bad_rating = 0
+            bad_score = 0
+            bad_tags = 0
+            blacklisted = 0
+            downloaded = 0
 
-            separated_tags = group.tags.split()
-            separated_ratings = group.ratings.split()
-
-            if len(separated_tags) > 5:
-                search_tags = ' '.join(separated_tags[0:5])
-
-                for tag in separated_tags:
-                    if tag not in search_tags.split():
-                        tag_overflow.append(tag)
+            if len(group[1]) > 5:
+                search = ' '.join(group[1][:5])
             else:
-                search_tags = group.tags
+                search = ' '.join(group[1])
 
-            while accumulating:
-                search_results = remote.get_posts(search_tags, check_date, current_page, constants.MAX_RESULTS, session)
+            for i in count():
+                results = remote.get_posts(search, check_date, i + 1, constants.MAX_RESULTS, session)
 
-                if not search_results:
-                    accumulating = False
-                else:
-                    posts_found += search_results
-                    accumulating = len(search_results) == constants.MAX_RESULTS
-                    current_page += 1
+                for post in results:
+                    filepath = local.make_path(group[0], [post['id'], post['md5'], post['file_ext']])
 
-            if len(posts_found) > 0:
-                bad_tags = 0
-                blacklisted = 0
-                bad_score = 0
-                bad_rating = 0
-                on_disk = 0
-                will_download = 0
-
-                for i, post in enumerate(posts_found):
-                    local.print_log('e621dl', 'debug', 'Item ' + str(i) + '\'s id is \"' + str(post.id) + '\".')
-
-                    filename = local.make_path(group.directory, post)
-                    current_tags = post.tags.split()
-
-                    if post.rating not in separated_ratings:
-                        bad_rating += 1
-                        local.print_log('e621dl', 'debug', 'Item ' + str(i) + ' was skipped. Has the wrong rating.')
-                    elif int(post.score) < group.score:
-                        bad_score += 1
-                        local.print_log('e621dl', 'debug', 'Item ' + str(i) + ' was skipped. Has a lower score than requested.')
-                    elif len(separated_tags) > 5 and not list(set(tag_overflow) & set(current_tags)):
-                        bad_tags += 1
-                        local.print_log('e621dl', 'debug', 'Item ' + str(i) + ' was skipped. Missing a requested tag.')
-                    elif list(set(blacklist) & set(current_tags)):
-                        blacklisted += 1
-                        local.print_log('e621dl', 'debug', 'Item ' + str(i) + ' was skipped. Contains a blacklisted tag.')
-                    elif os.path.isfile(filename):
+                    if os.path.isfile(filepath):
                         on_disk += 1
-                        local.print_log('e621dl', 'debug', 'Item ' + str(i) + ' was skipped. Already downloaded previously.')
+                        local.print_log('e621dl', 'debug', 'Post ' + str(post['id']) + ' was skipped. Already downloaded.')
+                    elif post['rating'] not in group[2]:
+                        bad_rating += 1
+                        local.print_log('e621dl', 'debug', 'Post ' + str(post['id']) + ' was skipped. Has the wrong rating.')
+                    elif post['score'] < group[3]:
+                        bad_score += 1
+                        local.print_log('e621dl', 'debug', 'Post ' + str(post['id']) + ' was skipped. Has too low a score.')
+                    elif not set(group[1][5:]).issubset(unidecode(post['tags']).split()):
+                        bad_tags += 1
+                        local.print_log('e621dl', 'debug', 'Post ' + str(post['id']) + ' was skipped. Missing tags.')
+                    elif any(x in blacklist for x in unidecode(post['tags']).split()):
+                        blacklisted += 1
+                        local.print_log('e621dl', 'debug', 'Post ' + str(post['id']) + ' was skipped. Contains a blacklisted tag.')
                     else:
-                        local.print_log('e621dl', 'debug', 'Item ' + str(i) + ' will be downloaded.')
-                        download_list.append((post.url, filename))
-                        will_download += 1
+                        downloaded += 1
+                        local.print_log('e621dl', 'debug', 'Post ' + str(post['id']) + ' will be downloaded.')
+                        remote.download_post(post['file_url'], filepath, session)
 
-                # I probably should not be using hard-coded spacing in here. Maybe I'll fix it later.
-                local.print_log('e621dl', 'info', str(will_download) + ' new files.\n' +
-                '                     ' + str(len(posts_found)) + ' total files found.\n' +
-                '                     ' + str(bad_rating) + ' have an unwanted rating.\n' +
-                '                     ' + str(bad_score) + ' have a low score.\n' +
-                '                     ' + str(bad_tags) + ' are missing tags.\n' +
-                '                     ' + str(blacklisted) + ' are blacklisted.\n' +
-                '                     ' + str(on_disk) + ' have been previously downloaded.')
+                    print('                     ' + str(downloaded) + ' new posts have been downloaded.\n' +
+                                    '                     ' + str(bad_rating) + ' posts have an unwanted rating.\n' +
+                                    '                     ' + str(bad_score) + ' posts have a low score.\n' +
+                                    '                     ' + str(bad_tags) + ' posts are missing tags.\n' +
+                                    '                     ' + str(blacklisted) + ' posts contain blacklisted tags.\n' +
+                                    '                     ' + str(on_disk) + ' posts have been previously downloaded.')
 
-                print('')
-            else:
-                local.print_log('e621dl', 'info', '0 new files.')
-                print('')
+                    if list.index(results, post) != len(results) - 1 and len(results) < constants.MAX_RESULTS or len(results) == constants.MAX_RESULTS:
+                        # This character moves the cursor back to the top of the post counting list.
+                        # [?A where ? is the number of lines to go up.
 
-        if download_list:
-            local.print_log('e621dl', 'info', 'Starting download of ' + str(len(download_list)) + ' files.')
-            remote.download_posts(download_list, session)
+                        print('\x1b[7A')
+
+                if len(results) < constants.MAX_RESULTS:
+                    break
+
             print('')
-
-            # Make the damaged file check more efficient.
-            #local.print_log('e621dl', 'info', 'Checking downloads for damaged files.')
-            #local.check_md5s()
-        else:
-            local.print_log('e621dl', 'info', 'Nothing to download.')
 
     sys.exit(0)
