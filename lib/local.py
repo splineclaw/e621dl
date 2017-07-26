@@ -2,21 +2,17 @@
 
 import argparse
 import configparser
-import hashlib
 import logging
 import os
-import re
 
 from . import constants
 
 def get_verbosity():
     parser = argparse.ArgumentParser(prog = 'e621dl', description = 'An automated e621 downloader.')
-
     verbosity = parser.add_mutually_exclusive_group(required = False)
-    verbosity.add_argument('-v', '--verbose', action = 'store_true', help = 'Display full debug \
-        information while running.')
-    verbosity.add_argument('-q', '--quiet', action = 'store_true', help = 'Display no output while \
-        running, except for errors.')
+
+    verbosity.add_argument('-v', '--verbose', action = 'store_true', help = 'Display full debug information while running.')
+    verbosity.add_argument('-q', '--quiet', action = 'store_true', help = 'Display no output while running, except for errors.')
 
     args = parser.parse_args()
 
@@ -24,8 +20,8 @@ def get_verbosity():
         return logging.ERROR
     elif args.verbose:
         return logging.DEBUG
-    else:
-        return logging.INFO
+
+    return logging.INFO
 
 def print_log(log_module, log_level, log_message):
     log = logging.getLogger(log_module)
@@ -49,14 +45,17 @@ def get_config(path):
 
 def tags_valid(config):
     for section in config.sections():
-
-        if not section.lower() == 'blacklist' or 'settings':
+        if section.lower() == 'settings' or section.lower() == 'blacklist':
+            pass
+        else:
             return True
 
+    print_log('config', 'error', 'No tag groups found.')
     return False
 
 def substitute_illegals(char):
     illegals = ['\\', ':', '*', '?', '\"', '<', '>', '|', ' ']
+
     return '_' if char in illegals else char
 
 def make_path(dir_name, post):
@@ -65,32 +64,4 @@ def make_path(dir_name, post):
     if not os.path.isdir('downloads/' + clean_dir_name):
         os.makedirs('downloads/' + clean_dir_name)
 
-    path = 'downloads/' + clean_dir_name + '/' + str(post[0]) + '-' + \
-    post[1] + '.' + post[2]
-
-    return path
-
-def check_md5s():
-    bad_hashes = 0
-
-    for root, dirs, files in os.walk('downloads'):
-        for path in files:
-            md5lib = hashlib.md5()
-
-            with open(os.path.join(root, path), 'rb') as infile:
-                while True:
-                    data = infile.read(65536)
-                    if not data:
-                        break
-                    md5lib.update(data)
-
-            hash_substring = re.findall(r'(?=(\b[A-Fa-f0-9]{32}\b))', path)
-
-            if not hash_substring == [] and not md5lib.hexdigest() == hash_substring[0]:
-                os.remove(os.path.join(root, path))
-                bad_hashes += 1
-
-    if bad_hashes > 0:
-        print_log('e621dl', 'info', 'Removed ' + str(bad_hashes) + ' damaged files.')
-    else:
-        print_log('e621dl', 'info', 'No damaged files were found.')
+    return 'downloads/' + clean_dir_name + '/' + str(post[0]) + '-' + post[1] + '.' + post[2]

@@ -119,19 +119,21 @@ if __name__ == '__main__':
                         remote.download_post(post['file_url'], filepath, session)
 
                     print('                     ' + str(downloaded) + ' new posts have been downloaded.\n' +
-                                    '                     ' + str(bad_rating) + ' posts have an unwanted rating.\n' +
-                                    '                     ' + str(bad_score) + ' posts have a low score.\n' +
-                                    '                     ' + str(bad_tags) + ' posts are missing tags.\n' +
-                                    '                     ' + str(blacklisted) + ' posts contain blacklisted tags.\n' +
-                                    '                     ' + str(on_disk) + ' posts have been previously downloaded.')
+                        '                     ' + str(bad_rating) + ' posts have an unwanted rating.\n' +
+                        '                     ' + str(bad_score) + ' posts have a low score.\n' +
+                        '                     ' + str(bad_tags) + ' posts are missing tags.\n' +
+                        '                     ' + str(blacklisted) + ' posts contain blacklisted tags.\n' +
+                        '                     ' + str(on_disk) + ' posts have been previously downloaded.' +
 
-                    if list.index(results, post) != len(results) - 1 and len(results) < constants.MAX_RESULTS or len(results) == constants.MAX_RESULTS:
-                        # This character moves the cursor back to the top of the post counting list.
-                        # [?A where ? is the number of lines to go up.
-
-                        print('\x1b[7A')
+                        # This character moves the cursor back to the top of the post counting display.
+                        # ESC[?A where ? is the number of lines to go up.
+                        '\x1b[6A')
 
                 if len(results) < constants.MAX_RESULTS:
+                    # Multiply this character by the number of lines needed to move down after checking all posts for a group.
+                    # For whatever reason, ESC[?B does not work.
+                    print('\x1b[1B' * 6)
+
                     break
 
             print('')
