@@ -5,6 +5,28 @@
 # \ <_. )  "compile well ducko"
 #  `---'
 
+REQUIREMENTS = ['unidecode>=0.4.21', 'requests>=2.13.0', 'colorama>=0.3.9']
+
+try:
+    import requests
+    from unidecode import unidecode
+    import colorama
+except ImportError:
+    import pip
+
+    while True:
+        response = input("You are missing at least one required package. Would you like to install it? Yes / No: ").lower()
+        if response in ['yes', 'y']:
+            for package in REQUIREMENTS:
+                pip.main(['install', package])
+            break
+        elif response in ['no', 'n']:
+            break
+finally:
+    import requests
+    from unidecode import unidecode
+    import colorama
+
 import datetime
 import logging
 import os
@@ -13,16 +35,7 @@ from itertools import count
 
 from lib import constants, local, remote
 
-try:
-    import requests
-    from unidecode import unidecode
-    import colorama
-except ImportError:
-    exit('Required packages are missing. Run \"pip install -r requirements.txt\" to install them.')
-
 if __name__ == '__main__':
-    colorama.init()
-
     logging.basicConfig(level = local.get_verbosity(), format = constants.LOGGER_FORMAT, stream = sys.stderr)
     local.print_log('e621dl', 'info', 'Running e621dl version ' + constants.VERSION + '.')
 
@@ -80,10 +93,10 @@ if __name__ == '__main__':
         for group in tag_groups:
             local.print_log('e621dl', 'info', 'Checking group \"' + group[0] + '\".')
 
-            on_disk = 0
+            in_storage = 0
             bad_rating = 0
             bad_score = 0
-            bad_tags = 0
+            bad_tag = 0
             blacklisted = 0
             downloaded = 0
 
@@ -92,6 +105,8 @@ if __name__ == '__main__':
             else:
                 search = ' '.join(group[1])
 
+            colorama.init()
+
             for i in count():
                 results = remote.get_posts(search, check_date, i + 1, constants.MAX_RESULTS, session)
 
@@ -99,31 +114,31 @@ if __name__ == '__main__':
                     filepath = local.make_path(group[0], [post['id'], post['md5'], post['file_ext']])
 
                     if os.path.isfile(filepath):
-                        on_disk += 1
-                        local.print_log('e621dl', 'debug', 'Post ' + str(post['id']) + ' was skipped. Already downloaded.')
+                        in_storage += 1
+                        local.print_log('e621dl', 'debug', 'Post ' + str(post['id']) + ' skipped. Already downloaded.')
                     elif post['rating'] not in group[2]:
                         bad_rating += 1
-                        local.print_log('e621dl', 'debug', 'Post ' + str(post['id']) + ' was skipped. Has the wrong rating.')
+                        local.print_log('e621dl', 'debug', 'Post ' + str(post['id']) + ' skipped. Bad rating.')
                     elif post['score'] < group[3]:
                         bad_score += 1
-                        local.print_log('e621dl', 'debug', 'Post ' + str(post['id']) + ' was skipped. Has too low a score.')
+                        local.print_log('e621dl', 'debug', 'Post ' + str(post['id']) + ' skipped. Bad score.')
                     elif not set(group[1][5:]).issubset(unidecode(post['tags']).split()):
-                        bad_tags += 1
-                        local.print_log('e621dl', 'debug', 'Post ' + str(post['id']) + ' was skipped. Missing tags.')
+                        bad_tag += 1
+                        local.print_log('e621dl', 'debug', 'Post ' + str(post['id']) + ' skipped. Bad tag.')
                     elif any(x in blacklist for x in unidecode(post['tags']).split()):
                         blacklisted += 1
-                        local.print_log('e621dl', 'debug', 'Post ' + str(post['id']) + ' was skipped. Contains a blacklisted tag.')
+                        local.print_log('e621dl', 'debug', 'Post ' + str(post['id']) + ' skipped. Blacklisted.')
                     else:
                         downloaded += 1
-                        local.print_log('e621dl', 'debug', 'Post ' + str(post['id']) + ' will be downloaded.')
+                        local.print_log('e621dl', 'debug', 'Post ' + str(post['id']) + ' will download.')
                         remote.download_post(post['file_url'], filepath, session)
 
-                    print('                     ' + str(downloaded) + ' new posts have been downloaded.\n' +
+                    print('                     ' + str(downloaded) + ' posts have been downloaded.\n' +
                         '                     ' + str(bad_rating) + ' posts have an unwanted rating.\n' +
                         '                     ' + str(bad_score) + ' posts have a low score.\n' +
-                        '                     ' + str(bad_tags) + ' posts are missing tags.\n' +
-                        '                     ' + str(blacklisted) + ' posts contain blacklisted tags.\n' +
-                        '                     ' + str(on_disk) + ' posts have been previously downloaded.' +
+                        '                     ' + str(bad_tag) + ' posts are missing a tag.\n' +
+                        '                     ' + str(blacklisted) + ' posts contain a blacklisted tag.\n' +
+                        '                     ' + str(in_storage) + ' posts are already in storage.' +
 
                         # This character moves the cursor back to the top of the post counting display.
                         # ESC[?A where ? is the number of lines to go up.
@@ -135,7 +150,3 @@ if __name__ == '__main__':
                     print('\x1b[1B' * 6)
 
                     break
-
-            print('')
-
-    sys.exit(0)

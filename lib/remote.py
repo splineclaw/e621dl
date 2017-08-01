@@ -1,14 +1,9 @@
-#!/usr/bin/env python3
-
 import shutil
 
 from . import local
 
-try:
-    import requests
-    from unidecode import unidecode
-except ImportError:
-    exit('Required packages are missing. Run \"pip install -r requirements.txt\" to install them.')
+import requests
+from unidecode import unidecode
 
 def get_posts(search_string, uploaded_after, page_number, max_results, session):
     request = 'https://e621.net/post/index.json?' + \

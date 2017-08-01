@@ -16,12 +16,13 @@ Once it knows these things, it goes through the searches one by one, and downloa
 
 - Download and install [the latest release of Python 3](https://www.python.org/downloads/).
 - Download [the latest release of **e621dl**](https://github.com/wulfre/e621dl/releases).
-  - Decompress the archive into any directory you would like.
+    - Decompress the archive into any directory you would like.
 - Download and install the required packages from the Python Package Index by opening your terminal/command line in the directory you decompressed e621dl into and running the command `pip install -r requirements.txt`.
 
 # Running **e621dl**
 
-- Open your terminal/command line in the directory you decompressed e621dl into, and run the command `python e621dl.py`.
+- Open your terminal/command line in the directory you decompressed e621dl into, and run the command `py e621dl.py`. Depending on your system, the command `py` may default to python 2. In this case you should run `py -3 e621dl.py`. Sometimes, your system may not recognize the `py` command at all in this case you should run `python3 e621dl.py`
+    - The most common error that occurs when running a python 3 program in python 2 is `SyntaxError: Missing parentheses in call to 'print'`.
 
 ## First-Time Run
 
@@ -31,7 +32,7 @@ The first time you run **e621dl**, you should see something similar to the follo
 e621dl      INFO     Running e621dl version X.X.X -- Forked from 2.4.6.
 config      ERROR    No config file found.
 config      INFO     New default file created: "config.ini".
-tags        ERROR    Please add at least one tag group to "config.ini".
+config      ERROR    No tag groups found.
 e621dl      INFO     Error(s) occurred during initialization, see above for more information.
 ```
 
@@ -71,21 +72,16 @@ Once you have added at least one group to the tags file, you should see somethin
 
 ```
 e621dl      INFO     Running e621dl version X.X.X -- Forked from 2.4.6.
-e621dl      INFO     Parsing config.
 
-e621dl      INFO     Looking for new posts since YYYY-MM-DD.
+e621dl      INFO     Checking for new posts since XX-XX-XXXX (X days).
 
-e621dl      INFO     Group "Canine/Fox" detected, checking for new posts tagged: "fox, feral".
-e621dl      INFO     19 new files.
-                     37 total files found.
-                     10 have an unwanted rating.
-                     3 have a low score.
-                     0 are missing tags.
-                     1 are blacklisted.
-                     4 have been previously downloaded.
-
-e621dl      INFO     Starting download of 19 files.
-Downloading          |████████████████████████████████████| 100% (19 / 19)
+e621dl      INFO     Checking group "Cute Cats".
+                     X posts have been downloaded.
+                     X posts have an unwanted rating.
+                     X posts have a low score.
+                     X posts are missing a tag.
+                     X posts contain a blacklisted tag.
+                     X posts are already in storage.
 ```
 
 # Automation of **e621dl**
