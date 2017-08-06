@@ -9,6 +9,7 @@ REQUIREMENTS = ['unidecode>=0.4.21', 'requests>=2.13.0', 'colorama>=0.3.9']
 
 try:
     import requests
+    from requests.adapters import HTTPAdapter
     from unidecode import unidecode
     import colorama
 except ImportError:
@@ -24,6 +25,7 @@ except ImportError:
             break
 finally:
     import requests
+    from requests.adapters import HTTPAdapter
     from unidecode import unidecode
     import colorama
 
@@ -90,6 +92,8 @@ if __name__ == '__main__':
     # group[3] = score
 
     with requests.Session() as session:
+        session.mount('https://e621.net', HTTPAdapter(max_retries=5))
+
         for group in tag_groups:
             local.print_log('e621dl', 'info', 'Checking group \"' + group[0] + '\".')
 

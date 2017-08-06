@@ -12,10 +12,10 @@ def get_posts(search_string, uploaded_after, page_number, max_results, session):
 
     local.print_log('remote', 'debug', 'Post request URL: \"' + request + '\".')
 
-    return session.get(request).json()
+    return session.get(request, timeout = 5).json()
 
 def download_post(url, path, session):
     with open(path, 'wb') as outfile:
-        for chunk in session.get(url, stream = True).iter_content(chunk_size = 1024):
+        for chunk in session.get(url, stream = True, timeout = 5).iter_content(chunk_size = 1024):
             if chunk:
                 outfile.write(chunk)
