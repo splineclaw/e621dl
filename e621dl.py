@@ -96,8 +96,8 @@ if __name__ == '__main__':
             in_storage = 0
             bad_rating = 0
             bad_score = 0
-            bad_tag = 0
             blacklisted = 0
+            bad_tag = 0
             downloaded = 0
 
             if len(group[1]) > 5:
@@ -122,31 +122,34 @@ if __name__ == '__main__':
                     elif post['score'] < group[3]:
                         bad_score += 1
                         local.print_log('e621dl', 'debug', 'Post ' + str(post['id']) + ' skipped. Bad score.')
-                    elif not set(group[1][5:]).issubset(unidecode(post['tags']).split()):
-                        bad_tag += 1
-                        local.print_log('e621dl', 'debug', 'Post ' + str(post['id']) + ' skipped. Bad tag.')
                     elif any(x in blacklist for x in unidecode(post['tags']).split()):
                         blacklisted += 1
                         local.print_log('e621dl', 'debug', 'Post ' + str(post['id']) + ' skipped. Blacklisted.')
+                    elif not set(group[1][5:]).issubset(unidecode(post['tags']).split()):
+                        bad_tag += 1
+                        local.print_log('e621dl', 'debug', 'Post ' + str(post['id']) + ' skipped. Bad tag.')
                     else:
                         downloaded += 1
                         local.print_log('e621dl', 'debug', 'Post ' + str(post['id']) + ' will download.')
                         remote.download_post(post['file_url'], filepath, session)
 
                     print('                     ' + str(downloaded) + ' posts have been downloaded.\n' +
+                        '                     ' + str(in_storage) + ' posts are already in storage.\n' +
                         '                     ' + str(bad_rating) + ' posts have an unwanted rating.\n' +
                         '                     ' + str(bad_score) + ' posts have a low score.\n' +
-                        '                     ' + str(bad_tag) + ' posts are missing a tag.\n' +
                         '                     ' + str(blacklisted) + ' posts contain a blacklisted tag.\n' +
-                        '                     ' + str(in_storage) + ' posts are already in storage.' +
+                        '                     ' + str(bad_tag) + ' posts are missing a tag.' +
 
                         # This character moves the cursor back to the top of the post counting display.
-                        # ESC[?A where ? is the number of lines to go up.
-                        '\x1b[6A')
+                        # Multiply this character by the number of lines needed to move up.
+                        '\x1b[1A' * 6)
 
                 if len(results) < constants.MAX_RESULTS:
-                    # Multiply this character by the number of lines needed to move down after checking all posts for a group.
-                    # For whatever reason, ESC[?B does not work.
-                    print('\x1b[1B' * 6)
+                    if(downloaded + in_storage + bad_rating + bad_score + blacklisted + bad_tag) == 0:
+                        print('                     No results found.\n')
+                    else:
+                        # This character returns the cursor to the bottom of the display after checking all posts for a group.
+                        # Multiply this character by the number of lines needed to move down.
+                        print('\x1b[1B' * 6)
 
                     break

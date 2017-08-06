@@ -1,3 +1,5 @@
+###### NOTE 8/5/2017: The filter output might be a little sloppy until the [reprint](https://github.com/Yinzo/reprint) module is updated to work with Windows. I have given feedback to the developer on a solution. If an update does not come in a reasonable amount of time, I will redesign the output.
+
 # What is **e621dl**?
 
 **e621dl** is an automated script, originally by [**@wwyaiykycnf**](https://github.com/wwyaiykycnf), which downloads images from e621.net. It can be used to create a local mirror of your favorite searches, and keep these searches up to date as new files are uploaded.
@@ -96,6 +98,6 @@ If you have any ideas on how to make this script run better, or for features you
 
 _Since this script was initially written by [**@wwyaiykycnf**](https://github.com/wwyaiykycnf) I will leave their donation section as it was before I forked the repository._
 
-If you've benefitted from this _free_ project, why not [buy me something on Amazon?](http://amzn.com/w/20RZIUHXLO6R4) There's tons of cheap bullshit on there I would totally get a kick out of owning.
+If you've benefited from this _free_ project, why not [buy me something on Amazon?](http://amzn.com/w/20RZIUHXLO6R4) There's tons of cheap bullshit on there I would totally get a kick out of owning.
 
 Alternatively, drop me an email at wwyaiykycnf+features@gmail.com and say thanks. Your support (monetary or not) provides me the motivation to keep fixing bugs and adding new features, so thanks for thinking of me!

@@ -1,5 +1,3 @@
-import shutil
-
 from . import local
 
 import requests
@@ -17,9 +15,7 @@ def get_posts(search_string, uploaded_after, page_number, max_results, session):
     return session.get(request).json()
 
 def download_post(url, path, session):
-    data = session.get(url, stream = True)
-
     with open(path, 'wb') as outfile:
-        shutil.copyfileobj(data.raw, outfile)
-
-        local.print_log('single_dl', 'debug', 'Downloading' + '\"' + url + '\" to \"' + path + '\".')
+        for chunk in session.get(url, stream = True).iter_content(chunk_size = 1024):
+            if chunk:
+                outfile.write(chunk)
