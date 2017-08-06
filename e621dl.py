@@ -9,7 +9,6 @@ REQUIREMENTS = ['unidecode>=0.4.21', 'requests>=2.13.0', 'colorama>=0.3.9']
 
 try:
     import requests
-    from requests.adapters import HTTPAdapter
     from unidecode import unidecode
     import colorama
 except ImportError:
@@ -25,7 +24,6 @@ except ImportError:
             break
 finally:
     import requests
-    from requests.adapters import HTTPAdapter
     from unidecode import unidecode
     import colorama
 
@@ -47,12 +45,26 @@ if __name__ == '__main__':
         local.print_log('e621dl', 'info', 'Error(s) occurred during initialization, see above for more information.')
         sys.exit(-1)
 
+    ordinal_check_date = ordinal_check_date = datetime.date.today().toordinal() - 7
+    timeout = 5
     blacklist = []
     tag_groups = []
 
     for section in config.sections():
         if section.lower() == 'settings':
-            pass
+            for option, value in config.items(section):
+                if option == 'days_to_check':
+                    ordinal_check_date = datetime.date.today().toordinal() - int((config.get('Settings', 'days_to_check')))
+
+                    if ordinal_check_date < 1:
+                        ordinal_check_date = 1
+                    elif ordinal_check_date > datetime.date.today().toordinal() - 1:
+                        ordinal_check_date = datetime.date.today().toordinal() - 1
+                if option == 'connection_timeout':
+                    timeout = int((config.get('Settings', 'connection_timeout')))
+
+                    if timeout < 0:
+                        timeout = None
 
         elif section.lower() == 'blacklist':
             blacklist = unidecode(config.get(section, 'tags').replace(',', '').strip()).lower().split()
@@ -73,13 +85,6 @@ if __name__ == '__main__':
 
     print('')
 
-    ordinal_check_date = datetime.date.today().toordinal() - int((config.get('Settings', 'days_to_check')))
-
-    if ordinal_check_date < 1:
-        ordinal_check_date = 1
-    elif ordinal_check_date > datetime.date.today().toordinal() - 1:
-        ordinal_check_date = datetime.date.today().toordinal() - 1
-
     check_date = datetime.date.fromordinal(ordinal_check_date).strftime(constants.DATE_FORMAT)
 
     local.print_log('e621dl', 'info', 'Checking for new posts since ' + check_date + ' (' + str(config.get('Settings', 'days_to_check')) + ' days).')
@@ -92,8 +97,6 @@ if __name__ == '__main__':
     # group[3] = score
 
     with requests.Session() as session:
-        session.mount('https://e621.net', HTTPAdapter(max_retries=5))
-
         for group in tag_groups:
             local.print_log('e621dl', 'info', 'Checking group \"' + group[0] + '\".')
 
@@ -112,7 +115,7 @@ if __name__ == '__main__':
             colorama.init()
 
             for i in count():
-                results = remote.get_posts(search, check_date, i + 1, constants.MAX_RESULTS, session)
+                results = remote.get_posts(search, check_date, i + 1, constants.MAX_RESULTS, session, timeout)
 
                 for post in results:
                     filepath = local.make_path(group[0], [post['id'], post['md5'], post['file_ext']])
@@ -135,7 +138,7 @@ if __name__ == '__main__':
                     else:
                         downloaded += 1
                         local.print_log('e621dl', 'debug', 'Post ' + str(post['id']) + ' will download.')
-                        remote.download_post(post['file_url'], filepath, session)
+                        remote.download_post(post['file_url'], filepath, session, timeout)
 
                     print('                     ' + str(downloaded) + ' posts have been downloaded.\n' +
                         '                     ' + str(in_storage) + ' posts are already in storage.\n' +
