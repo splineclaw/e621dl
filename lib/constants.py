@@ -12,8 +12,7 @@ DEFAULT_CONFIG_TEXT = ''';;;;;;;;;;;;;;;;;;;
 ; This is not recommended unless your internet connection is extremely unreliable. If you need to force exit the program, press CTRL + C.
 
 [Settings]
-days_to_check = 7
-connection_timeout = 5
+days_to_check = 1
 
 [Blacklist]
 tags =

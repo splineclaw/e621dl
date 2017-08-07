@@ -5,6 +5,12 @@
 # \ <_. )  "compile well ducko"
 #  `---'
 
+import datetime
+import logging
+import os
+import sys
+from itertools import count
+
 REQUIREMENTS = ['unidecode>=0.4.21', 'requests>=2.13.0', 'colorama>=0.3.9']
 
 try:
@@ -27,12 +33,6 @@ finally:
     from unidecode import unidecode
     import colorama
 
-import datetime
-import logging
-import os
-import sys
-from itertools import count
-
 from lib import constants, local, remote
 
 if __name__ == '__main__':
@@ -45,8 +45,7 @@ if __name__ == '__main__':
         local.print_log('e621dl', 'info', 'Error(s) occurred during initialization, see above for more information.')
         sys.exit(-1)
 
-    ordinal_check_date = ordinal_check_date = datetime.date.today().toordinal() - 7
-    timeout = 5
+    ordinal_check_date = ordinal_check_date = datetime.date.today().toordinal() - 1
     blacklist = []
     tag_groups = []
 
@@ -60,11 +59,6 @@ if __name__ == '__main__':
                         ordinal_check_date = 1
                     elif ordinal_check_date > datetime.date.today().toordinal() - 1:
                         ordinal_check_date = datetime.date.today().toordinal() - 1
-                if option == 'connection_timeout':
-                    timeout = int((config.get('Settings', 'connection_timeout')))
-
-                    if timeout < 0:
-                        timeout = None
 
         elif section.lower() == 'blacklist':
             blacklist = unidecode(config.get(section, 'tags').replace(',', '').strip()).lower().split()
@@ -108,14 +102,14 @@ if __name__ == '__main__':
             downloaded = 0
 
             if len(group[1]) > 5:
-                search = ' '.join(group[1][:5])
+                search_string = ' '.join(group[1][:5])
             else:
-                search = ' '.join(group[1])
+                search_string = ' '.join(group[1])
 
             colorama.init()
 
             for i in count():
-                results = remote.get_posts(search, check_date, i + 1, constants.MAX_RESULTS, session, timeout)
+                results = remote.get_posts(search_string, check_date, i + 1, constants.MAX_RESULTS, session)
 
                 for post in results:
                     filepath = local.make_path(group[0], [post['id'], post['md5'], post['file_ext']])
@@ -138,7 +132,7 @@ if __name__ == '__main__':
                     else:
                         downloaded += 1
                         local.print_log('e621dl', 'debug', 'Post ' + str(post['id']) + ' will download.')
-                        remote.download_post(post['file_url'], filepath, session, timeout)
+                        remote.download_post(post['file_url'], filepath, session)
 
                     print('                     ' + str(downloaded) + ' posts have been downloaded.\n' +
                         '                     ' + str(in_storage) + ' posts are already in storage.\n' +
