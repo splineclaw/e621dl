@@ -1,8 +1,7 @@
 MAX_RESULTS = 320
 DATE_FORMAT = '%Y-%m-%d'
 LOGGER_FORMAT = '%(name)-11s %(levelname)-8s %(message)s'
-VERSION = '4.0.1 -- Forked from 2.4.6'
-
+VERSION = '4.1.0 -- Forked from 2.4.6'
 
 DEFAULT_CONFIG_TEXT = ''';;;;;;;;;;;;;;;;;;;
 ;; MAIN SETTINGS ;;

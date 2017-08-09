@@ -21,14 +21,15 @@ def get_verbosity():
 
     return logging.INFO
 
-def print_log(log_module, log_level, log_message):
-    log = logging.getLogger(log_module)
+def print_log(module, log_level, log_message):
+    logging.basicConfig(level = get_verbosity(), format = constants.LOGGER_FORMAT)
+    log = logging.getLogger(module)
     getattr(log, log_level)(log_message)
 
 def make_config(path):
-    with open(path, 'w') as outfile:
+    with open(path, mode = 'w', encoding = 'utf_8_sig') as outfile:
         outfile.write(constants.DEFAULT_CONFIG_TEXT)
-        print_log('config', 'info', 'New default file created: \"' + path + '\".')
+        print_log('config', 'info', 'New default file created: \"' + path + '\". Please add tag groups to this file.')
 
 def get_config(path):
     config = configparser.ConfigParser()
@@ -37,19 +38,9 @@ def get_config(path):
         print_log('config', 'error', 'No config file found.')
         make_config(path)
 
-    with open(path, 'r') as infile:
+    with open(path, mode = 'r', encoding = 'utf_8_sig') as infile:
         config.read_file(infile)
         return config
-
-def tags_valid(config):
-    for section in config.sections():
-        if section.lower() == 'settings' or section.lower() == 'blacklist':
-            pass
-        else:
-            return True
-
-    print_log('config', 'error', 'No tag groups found.')
-    return False
 
 def substitute_illegals(char):
     illegals = ['\\', ':', '*', '?', '\"', '<', '>', '|', ' ']
