@@ -41,7 +41,6 @@ def get_tag_alias(user_tag, session):
 
             return prefix + results['name']
 
-    print('')
     local.print_log('remote', 'error', 'The tag ' + prefix + user_tag + ' is spelled incorrectly or does not exist.')
     exit()
 

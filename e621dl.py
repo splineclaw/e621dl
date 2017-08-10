@@ -37,7 +37,7 @@ if __name__ == '__main__':
 
         local.print_log('e621dl', 'info', 'Running e621dl version ' + constants.VERSION + '.')
 
-        config = local.get_config('config.ini')
+        config = local.get_config()
 
         blacklist = []
         tag_groups = []
@@ -64,13 +64,11 @@ if __name__ == '__main__':
                     elif option == 'ratings':
                         default_ratings = value.replace(',', ' ').lower().strip().split()
             elif section.lower() == 'blacklist':
-                blacklist = config.get(section, 'tags').replace(',', ' ').lower().strip().split()
-                blacklist[:] = [remote.get_tag_alias(tag, session) for tag in blacklist]
+                blacklist = [remote.get_tag_alias(tag.lower(), session) for tag in config.get(section, 'tags').replace(',', ' ').lower().strip().split()]
             else:
                 for option, value in config.items(section):
                     if option == 'tags':
-                        section_tags = value.replace(',', ' ').lower().strip().split()
-                        section_tags[:] = [remote.get_tag_alias(tag, session) for tag in section_tags]
+                        section_tags = [remote.get_tag_alias(tag.lower(), session) for tag in value.replace(',', ' ').lower().strip().split()]
                     elif option == 'days_to_check':
                         section_date = local.get_date(int(value))
                     elif option == 'min_score':
@@ -81,6 +79,8 @@ if __name__ == '__main__':
                 tag_groups.append([section, section_tags, section_ratings, section_score, section_date])
 
         for group in tag_groups:
+            print('')
+
             directory = group[0]
             tags = group[1]
             ratings = group[2]
