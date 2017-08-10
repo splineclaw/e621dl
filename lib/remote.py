@@ -1,14 +1,12 @@
 from . import local
 
-def get_posts(search_string, min_score, uploaded_after, page_number, max_results, session):
+def get_posts(search_string, min_score, earliest_date, page_number, max_results, session):
     request = 'https://e621.net/post/index.json?' + \
         'tags=' + search_string + \
-        ' date:>=' + str(uploaded_after) + \
+        ' date:>=' + str(earliest_date) + \
         ' score:>=' + str(min_score) + \
         '&page=' + str(page_number) + \
         '&limit=' + str(max_results)
-
-    local.print_log('remote', 'debug', 'Post request URL: \"' + request + '\".')
 
     return session.get(request).json()
 

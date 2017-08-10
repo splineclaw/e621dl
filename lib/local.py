@@ -2,6 +2,7 @@ import argparse
 import configparser
 import logging
 import os
+import datetime
 
 from . import constants
 
@@ -21,8 +22,12 @@ def get_verbosity():
 
     return logging.INFO
 
+def init_log():
+    logging.basicConfig(level=get_verbosity(), format=constants.LOGGER_FORMAT)
+    logging.getLogger("requests").setLevel(logging.CRITICAL)
+    logging.getLogger("urllib3").setLevel(logging.CRITICAL)
+
 def print_log(module, log_level, log_message):
-    logging.basicConfig(level = get_verbosity(), format = constants.LOGGER_FORMAT)
     log = logging.getLogger(module)
     getattr(log, log_level)(log_message)
 
@@ -41,6 +46,16 @@ def get_config(path):
     with open(path, mode = 'r', encoding = 'utf_8_sig') as infile:
         config.read_file(infile)
         return config
+
+def get_date(days_to_check):
+    ordinal_check_date = datetime.date.today().toordinal() - (days_to_check - 1)
+
+    if ordinal_check_date < 1:
+        ordinal_check_date = 1
+    elif ordinal_check_date > datetime.date.today().toordinal():
+        ordinal_check_date = datetime.date.today().toordinal()
+
+    return datetime.date.fromordinal(ordinal_check_date).strftime(constants.DATE_FORMAT)
 
 def substitute_illegals(char):
     illegals = ['\\', ':', '*', '?', '\"', '<', '>', '|', ' ']
