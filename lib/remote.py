@@ -39,6 +39,8 @@ def get_tag_alias(user_tag, session):
             request = 'https://e621.net/tag/show.json?id=' + str(tag['alias_id'])
             results = session.get(request).json()
 
+            local.print_log('remote', 'info', 'Tag aliased: ' + prefix + user_tag + ' -> ' + prefix + results['name'])
+
             return prefix + results['name']
 
     local.print_log('remote', 'error', 'The tag ' + prefix + user_tag + ' is spelled incorrectly or does not exist.')

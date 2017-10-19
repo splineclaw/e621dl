@@ -35,7 +35,8 @@ def make_config():
     with open('config.ini', 'wt', encoding = 'utf_8_sig') as outfile:
         outfile.write(constants.DEFAULT_CONFIG_TEXT)
         print_log('config', 'info', 'New default config file created. Please add tag groups to this file.')
-        exit()
+
+    exit()
 
 def get_config():
     config = configparser.ConfigParser()
@@ -46,7 +47,8 @@ def get_config():
 
     with open('config.ini', 'rt', encoding = 'utf_8_sig') as infile:
         config.read_file(infile)
-        return config
+
+    return config
 
 def get_date(days_to_check):
     ordinal_check_date = datetime.date.today().toordinal() - (days_to_check - 1)

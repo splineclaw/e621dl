@@ -1,39 +1,27 @@
 #!/usr/bin/env python3
 
-#     __
-# ___( o)> i am the wise duck of code, your code will compile without errors, but only if you say
-# \ <_. )  "compile well ducko"
-#  `---'
-
 import os
 from itertools import count
-
 from lib import constants, local, remote
-
-REQUIREMENTS = ['requests>=2.13.0', 'colorama>=0.3.9']
 
 try:
     import requests
-    import colorama
 except ImportError:
     import pip
 
     while True:
-        response = input("You are missing at least one required package. Would you like to install it? Yes / No: ").lower()
-        if response in ['yes', 'y']:
-            for package in REQUIREMENTS:
+        response = input("You are missing at least one required package. Would you like to install missing packages? (y/n): ").lower()
+        if response in ['yes', 'ye', 'y']:
+            for package in constants.REQUIREMENTS:
                 pip.main(['install', package])
+            import requests
             break
         elif response in ['no', 'n']:
             break
-finally:
-    import requests
-    import colorama
 
 if __name__ == '__main__':
     with requests.Session() as session:
         local.init_log()
-        colorama.init()
 
         local.print_log('e621dl', 'info', 'Running e621dl version ' + constants.VERSION + '.')
 
@@ -47,7 +35,7 @@ if __name__ == '__main__':
         default_ratings = ['s']
 
         print('')
-        local.print_log('e621dl', 'info', 'Converting tag aliases.')
+        local.print_log('e621dl', 'info', 'Aliasing tags.')
 
         for section in config.sections():
             section_tags = []
@@ -57,23 +45,23 @@ if __name__ == '__main__':
 
             if section.lower() == 'defaults':
                 for option, value in config.items(section):
-                    if option == 'days_to_check':
+                    if option in {'days_to_check', 'days'}:
                         default_date = local.get_date(int(value))
-                    elif option == 'min_score':
+                    elif option in {'min_score', 'score'}:
                         default_score = int(value)
-                    elif option == 'ratings':
+                    elif option in {'ratings', 'rating'}:
                         default_ratings = value.replace(',', ' ').lower().strip().split()
             elif section.lower() == 'blacklist':
                 blacklist = [remote.get_tag_alias(tag.lower(), session) for tag in config.get(section, 'tags').replace(',', ' ').lower().strip().split()]
             else:
                 for option, value in config.items(section):
-                    if option == 'tags':
+                    if option in {'tags', 'tag'}:
                         section_tags = [remote.get_tag_alias(tag.lower(), session) for tag in value.replace(',', ' ').lower().strip().split()]
-                    elif option == 'days_to_check':
+                    elif option in {'days_to_check', 'days'}:
                         section_date = local.get_date(int(value))
-                    elif option == 'min_score':
+                    elif option in {'min_score', 'score'}:
                         section_score = int(value)
-                    elif option == 'ratings':
+                    elif option in {'ratings', 'rating'}:
                         section_ratings = value.replace(',', ' ').lower().strip().split()
 
                 tag_groups.append([section, section_tags, section_ratings, section_score, section_date])
@@ -87,7 +75,12 @@ if __name__ == '__main__':
             min_score = group[3]
             earliest_date = group[4]
 
-            local.print_log('e621dl', 'info', 'Checking group \"' + directory + '\".')
+            col_titles = ['new', 'duplicate', 'rating conflict', 'blacklisted', 'missing tag']
+            row_len = sum(len(x) for x in col_titles) + ((len(col_titles) * 3) - 1)
+
+            print('┌' + '─' * row_len + '┐')
+            print('│{:^{width}}│'.format(directory, width = row_len))
+            print('├─' + '─' * len(col_titles[0]) + '─┬─' + '─' * len(col_titles[1]) + '─┬─' + '─' * len(col_titles[2]) + '─┬─' + '─' * len(col_titles[3]) + '─┬─' + '─' * len(col_titles[4]) + '─┤')
 
             in_storage = 0
             bad_rating = 0
@@ -99,6 +92,9 @@ if __name__ == '__main__':
                 search_string = ' '.join(tags[:4])
             else:
                 search_string = ' '.join(tags)
+
+            print('│ ' + ' │ '.join(col_titles) + ' │')
+            print('├─' + '─' * len(col_titles[0]) + '─┼─' + '─' * len(col_titles[1]) + '─┼─' + '─' * len(col_titles[2]) + '─┼─' + '─' * len(col_titles[3]) + '─┼─' + '─' * len(col_titles[4]) + '─┤')
 
             for i in count(start = 1):
                 results = remote.get_posts(search_string, min_score, earliest_date, i, constants.MAX_RESULTS, session)
@@ -118,22 +114,20 @@ if __name__ == '__main__':
                         downloaded += 1
                         remote.download_post(post['file_url'], path, session)
 
-                    print('                     ' + str(downloaded) + ' posts have been downloaded.\n' +
-                        '                     ' + str(in_storage) + ' posts are already in storage.\n' +
-                        '                     ' + str(bad_rating) + ' posts have an unwanted rating.\n' +
-                        '                     ' + str(blacklisted) + ' posts contain a blacklisted tag.\n' +
-                        '                     ' + str(bad_tag) + ' posts are missing a tag.' +
-
-                        # This character moves the cursor back to the top of the post counting display.
-                        # Multiply this character by the number of lines needed to move up.
-                        '\x1b[1A' * 5)
+                    print('│ {:^{width0}} │ {:^{width1}} │ {:^{width2}} │ {:^{width3}} │ {:^{width4}} │'.format(
+                        str(downloaded), str(in_storage), str(bad_rating), str(blacklisted), str(bad_tag),
+                        width0 = len(col_titles[0]), width1 = len(col_titles[1]), width2 = len(col_titles[2]), width3 = len(col_titles[3]), width4 = len(col_titles[4])
+                        ), end='\r', flush=True)
 
                 if len(results) < constants.MAX_RESULTS:
+                    # I know that it's bad to copy and paste code, but I'm having a hard time printing this row when there are no results.
                     if (downloaded + in_storage + bad_rating + blacklisted + bad_tag) == 0:
-                        print('                     No results found.')
-                    else:
-                        # This character returns the cursor to the bottom of the display after checking all posts for a group.
-                        # Multiply this character by the number of lines needed to move down.
-                        print('\x1b[1B' * 4)
+                        print('│ {:^{width0}} │ {:^{width1}} │ {:^{width2}} │ {:^{width3}} │ {:^{width4}} │'.format(
+                        '0', '0', '0', '0', '0',
+                        width0 = len(col_titles[0]), width1 = len(col_titles[1]), width2 = len(col_titles[2]), width3 = len(col_titles[3]), width4 = len(col_titles[4])
+                        ), end='\r', flush=True)
+
+                    print('')
+                    print('└─' + '─' * len(col_titles[0]) + '─┴─' + '─' * len(col_titles[1]) + '─┴─' + '─' * len(col_titles[2]) + '─┴─' + '─' * len(col_titles[3]) + '─┴─' + '─' * len(col_titles[4]) + '─┘')
 
                     break

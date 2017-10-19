@@ -23,14 +23,11 @@ ehthumbs_vista.db
 *.lnk
 
 ####################################
-# JETBRAINS
+# VS CODE
 ####################################
 
 # User Files
-.idea/
-
-# CMake
-cmake-build-debug/
+.vscode/
 
 ####################################
 # PYTHON
