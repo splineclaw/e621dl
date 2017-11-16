@@ -21,6 +21,8 @@ except ImportError:
 
 if __name__ == '__main__':
     with requests.Session() as session:
+        session.headers['User-Agent'] = constants.USER_AGENT
+
         local.init_log()
 
         local.print_log('e621dl', 'info', 'Running e621dl version ' + constants.VERSION + '.')

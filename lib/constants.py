@@ -1,5 +1,6 @@
 REQUIREMENTS = ['requests>=2.13.0']
-VERSION = '4.2.0 -- Forked from 2.4.6'
+VERSION = '4.2.1 -- Forked from 2.4.6'
+USER_AGENT = 'e621dl (Wulfre) -- Version ' + VERSION
 
 MAX_RESULTS = 320
 DATE_FORMAT = '%Y-%m-%d'

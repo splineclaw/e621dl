@@ -21,18 +21,19 @@ Once it knows these things, it goes through the searches one by one, and downloa
 
 # Running **e621dl**
 
-- Open your terminal/command line in the directory you decompressed e621dl into, and run the command `py e621dl.py`. Depending on your system, the command `py` may default to python 2. In this case you should run `py -3 e621dl.py`. Sometimes, your system may not recognize the `py` command at all in this case you should run `python3 e621dl.py`
-    - The most common error that occurs when running a python 3 program in python 2 is `SyntaxError: Missing parentheses in call to 'print'`.
+- Open your terminal/command line in the directory you decompressed e621dl into, and run the command `py e621dl.py`. Depending on your system, the command `py` may default to Python 2. In this case you should run `py -3 e621dl.py`. Sometimes, your system may not recognize the `py` command at all. In this case you should run `python3 e621dl.py`. In some cases where Python 3 was the first installed version of Python, the command `python e621dl.py` will be used.
+    - The most common error that occurs when running a Python 3 program in Python 2 is `SyntaxError: Missing parentheses in call to 'print'`.
 
 ## First Run
 
-The first time you run **e621dl**, you may see:
+The first time you run **e621dl**, you may see the following prompt:
 
 ```
 You are missing at least one required package. Would you like to install missing packages? (y/n):
 ```
 
 Saying yes to this prompt will install the required packages for running **e621dl** through pip. Pip is normally installed alongside python unless a custom installation is done.
+    - _You must run your command shell with admin/sudo permissions for the installation of new packages to be successful._
 
 The required packages for **e621dl** are currently:
 - [requests](https://python-requests.org)
@@ -40,7 +41,7 @@ The required packages for **e621dl** are currently:
 If you agree, **e621dl** will continue to run, and you will see:
 
 ```
-e621dl      INFO     Running e621dl version 4.2.0 -- Forked from 2.4.6.
+e621dl      INFO     Running e621dl version X.X.X -- Forked from 2.4.6.
 config      ERROR    No config file found.
 config      INFO     New default config file created. Please add tag groups to this file.
 ```
@@ -137,11 +138,3 @@ It should be recognized that **e621dl**, as a script, can be scheduled to run as
 # Feedback and Requests
 
 If you have any ideas on how to make this script run better, or for features you would like to see in the future, [open an issue](https://github.com/Wulfre/e621dl/issues) and I will try to read it as soon as possible.
-
-# Donations
-
-_Since this script was initially written by [**@wwyaiykycnf**](https://github.com/wwyaiykycnf) I will leave their donation section as it was before I forked the repository._
-
-If you've benefited from this _free_ project, why not [buy me something on Amazon?](http://amzn.com/w/20RZIUHXLO6R4) There's tons of cheap bullshit on there I would totally get a kick out of owning.
-
-Alternatively, drop me an email at wwyaiykycnf+features@gmail.com and say thanks. Your support (monetary or not) provides me the motivation to keep fixing bugs and adding new features, so thanks for thinking of me!
