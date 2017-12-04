@@ -1,5 +1,10 @@
 from . import local
 
+def get_github_release(session):
+    request = 'https://api.github.com/repos/wulfre/e621dl/releases/latest'
+    results = session.get(request).json()
+    return results['tag_name'].strip('v')
+
 def get_posts(search_string, min_score, earliest_date, page_number, max_results, session):
     request = 'https://e621.net/post/index.json?' + \
         'tags=' + search_string + \

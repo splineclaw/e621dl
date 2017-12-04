@@ -42,9 +42,16 @@ ehthumbs_vista.db
 __pycache__/
 *.pyc
 
+# Pyinstaller
+*.ico
+*.spec
+build/
+dist/
+
 ####################################
 # OTHER
 ####################################
 
 # Repo Specific
 downloads/
+build.bat

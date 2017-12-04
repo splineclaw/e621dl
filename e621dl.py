@@ -1,27 +1,21 @@
 #!/usr/bin/env python3
 
-import os
+import os, sys, requests
 from itertools import count
+from distutils.version import StrictVersion
 from lib import constants, local, remote
-
-try:
-    import requests
-except ImportError:
-    import pip
-
-    while True:
-        response = input("You are missing at least one required package. Would you like to install missing packages? (y/n): ").lower()
-        if response in ['yes', 'ye', 'y']:
-            for package in constants.REQUIREMENTS:
-                pip.main(['install', package])
-            import requests
-            break
-        elif response in ['no', 'n']:
-            break
 
 if __name__ == '__main__':
     with requests.Session() as session:
         session.headers['User-Agent'] = constants.USER_AGENT
+
+        if StrictVersion(constants.VERSION) < StrictVersion(remote.get_github_release(session)):
+            while True:
+                response = input('A new version of e621dl is available on github (https://github.com/Wulfre/e621dl/releases/latest). Would you like to continue running? (y/n): ').lower()
+                if response in ['yes', 'ye', 'y']:
+                    break
+                elif response in ['no', 'n']:
+                    sys.exit()
 
         local.init_log()
 

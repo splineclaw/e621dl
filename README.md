@@ -13,18 +13,28 @@ Once it knows these things, it goes through the searches one by one, and downloa
 
 # Installing and Setting Up **e621dl**
 
+- Download [the latest executable release of **e621dl**](https://github.com/wulfre/e621dl/releases).
+
+*or*
+
 - Download and install [the latest release of Python 3](https://www.python.org/downloads/).
-- Download [the latest release of **e621dl**](https://github.com/wulfre/e621dl/releases).
+- Download [the latest *source* release of **e621dl**](https://github.com/wulfre/e621dl/releases).
     - Decompress the archive into any directory you would like.
 
-# Running **e621dl**
+#Running **e621dl**
+## Running **e621dl** from the Windows executable.
+
+- Double click the e621dl.exe icon to run the program. It will close immediately on completion.
+    - If you would like to read the output after the execution is complete, run the program through the command prompt in the directory that you placed the .exe file.
+
+## Running **e621dl** from source.
 
 - Open your terminal/command line in the directory you decompressed e621dl into, and run the command `py e621dl.py`. Depending on your system, the command `py` may default to Python 2. In this case you should run `py -3 e621dl.py`. Sometimes, your system may not recognize the `py` command at all. In this case you should run `python3 e621dl.py`. In some cases where Python 3 was the first installed version of Python, the command `python e621dl.py` will be used.
     - The most common error that occurs when running a Python 3 program in Python 2 is `SyntaxError: Missing parentheses in call to 'print'`.
 
 ## First Run
 
-The first time you run **e621dl**, you may see the following prompt:
+The first time you run **e621dl**, you may see the following prompt, this will only occur if you are running from source:
 
 ```
 You are missing at least one required package. Would you like to install missing packages? (y/n):
