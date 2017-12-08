@@ -1,3 +1,5 @@
+[![Downloads](https://img.shields.io/github/downloads/wulfre/e621dl/total.svg)]
+
 # What is **e621dl**?
 
 **e621dl** is an automated script, originally by [**@wwyaiykycnf**](https://github.com/wwyaiykycnf), which downloads images from e621.net. It can be used to create a local mirror of your favorite searches, and keep these searches up to date as new posts are uploaded.
@@ -21,7 +23,7 @@ Once it knows these things, it goes through the searches one by one, and downloa
 - Download [the latest *source* release of **e621dl**](https://github.com/wulfre/e621dl/releases).
     - Decompress the archive into any directory you would like.
 
-#Running **e621dl**
+# Running **e621dl**
 ## Running **e621dl** from the Windows executable.
 
 - Double click the e621dl.exe icon to run the program. It will close immediately on completion.
