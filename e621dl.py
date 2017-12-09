@@ -11,12 +11,7 @@ if __name__ == '__main__':
         session.headers['User-Agent'] = constants.USER_AGENT
 
         if StrictVersion(constants.VERSION) < StrictVersion(remote.get_github_release(session)):
-            while True:
-                response = input('A new version of e621dl is available on github (https://github.com/Wulfre/e621dl/releases/latest). Would you like to continue running? (y/n): ').lower()
-                if response in ['yes', 'ye', 'y']:
-                    break
-                elif response in ['no', 'n']:
-                    sys.exit()
+           local.print_log('e621dl', 'info', 'A NEW VERSION OF E621DL IS AVAILABLE ON GITHUB: (https://github.com/Wulfre/e621dl/releases/latest).')
 
         local.init_log()
 
