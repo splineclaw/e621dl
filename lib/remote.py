@@ -21,6 +21,9 @@ def get_tag_alias(user_tag, session):
     if ':' in user_tag:
         return user_tag
 
+    if '*' in user_tag and session.get('https://e621.net/tag/index.json?name=' + user_tag).json():
+        return user_tag
+
     if user_tag[0] == '~':
         prefix = '~'
         user_tag = user_tag.strip('~')

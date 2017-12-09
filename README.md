@@ -1,4 +1,4 @@
-[![Downloads](https://img.shields.io/github/downloads/wulfre/e621dl/total.svg)]
+[![Github All Releases](https://img.shields.io/github/downloads/wulfre/e621dl/total.svg)](https://github.com/Wulfre/e621dl/releases/latest)
 
 # What is **e621dl**?
 
@@ -100,7 +100,7 @@ tags                  | Nearly Anything                 | Tags which will be use
 
 ## [Optional] Add blacklisted tags to the config file.
 
-Add any tags for posts you would like to avoid downloading to the blacklist section of the `config.ini` file. Meta tags `:`, negative tags `-`, operational tags `~`, and wildcard tags `*` will potentially break the script, as they are currently not filtered out of the blacklist, so do not use them in this section.
+Add any tags for posts you would like to avoid downloading to the blacklist section of the `config.ini` file. Meta tags `:`, negative tags `-`, operational tags `~`, will potentially break the script, as they are currently not filtered out of the blacklist, so do not use them in this section. Wildcard tags `*` *are* supported in the blacklist, though it is easy for a misspelled wildcard to match an artist's name, for example, and the program will not give any errors.
 
 ## [Optional] Modify the defaults in the config file.
 

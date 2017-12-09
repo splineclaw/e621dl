@@ -1,5 +1,4 @@
-REQUIREMENTS = ['requests>=2.13.0']
-VERSION = '4.2.2'
+VERSION = '4.2.3'
 VERSION_NOTE = 'Forked from 2.4.6'
 USER_AGENT = 'e621dl (Wulfre) -- Version ' + VERSION
 

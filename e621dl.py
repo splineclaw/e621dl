@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os, sys, requests
+from fnmatch import fnmatch
 from itertools import count
 from distutils.version import StrictVersion
 from lib import constants, local, remote
@@ -102,7 +103,7 @@ if __name__ == '__main__':
                         in_storage += 1
                     elif post['rating'] not in ratings:
                         bad_rating += 1
-                    elif any(x in blacklist for x in post['tags'].split()):
+                    elif [x for x in post['tags'].split() if any(fnmatch(x, y) for y in blacklist)]:
                         blacklisted += 1
                     elif not set(tags[4:]).issubset(post['tags'].split()):
                         bad_tag += 1
