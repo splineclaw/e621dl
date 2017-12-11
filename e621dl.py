@@ -10,10 +10,10 @@ if __name__ == '__main__':
     with requests.Session() as session:
         session.headers['User-Agent'] = constants.USER_AGENT
 
-        if StrictVersion(constants.VERSION) < StrictVersion(remote.get_github_release(session)):
-           local.print_log('e621dl', 'info', 'A NEW VERSION OF E621DL IS AVAILABLE ON GITHUB: (https://github.com/Wulfre/e621dl/releases/latest).')
-
         local.init_log()
+
+        if StrictVersion(constants.VERSION) < StrictVersion(remote.get_github_release(session)):
+            local.print_log('e621dl', 'info', 'A NEW VERSION OF E621DL IS AVAILABLE ON GITHUB: (https://github.com/Wulfre/e621dl/releases/latest).')
 
         local.print_log('e621dl', 'info', 'Running e621dl version ' + constants.VERSION + '.')
 
