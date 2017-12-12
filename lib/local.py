@@ -1,5 +1,5 @@
 import argparse, configparser, logging, os, datetime
-from . import constants
+from . import constants, remote
 
 def get_verbosity():
     parser = argparse.ArgumentParser(prog = 'e621dl', description = 'An automated e621 downloader.')
@@ -29,7 +29,7 @@ def print_log(module, log_level, log_message):
 def make_config():
     with open('config.ini', 'wt', encoding = 'utf_8_sig') as outfile:
         outfile.write(constants.DEFAULT_CONFIG_TEXT)
-        print_log('config', 'info', 'New default config file created. Please add tag groups to this file.')
+        print_log('local', 'info', 'New default config file created. Please add tag groups to this file.')
 
     exit()
 
@@ -37,7 +37,7 @@ def get_config():
     config = configparser.ConfigParser()
 
     if not os.path.isfile('config.ini'):
-        print_log('config', 'error', 'No config file found.')
+        print_log('local', 'error', 'No config file found.')
         make_config()
 
     with open('config.ini', 'rt', encoding = 'utf_8_sig') as infile:
@@ -60,16 +60,10 @@ def substitute_illegals(char):
 
     return '_' if char in illegals else char
 
-def make_path(dir_name, post):
+def make_path(dir_name, postid, ext):
     clean_dir_name = ''.join([substitute_illegals(char) for char in dir_name]).lower()
 
     if not os.path.isdir('downloads/' + clean_dir_name):
         os.makedirs('downloads/' + clean_dir_name)
 
-    return 'downloads/' + clean_dir_name + '/' + str(post[0]) + '-' + post[1] + '.' + post[2]
-
-def delete_partial_downloads():
-    for root, dirs, files in os.walk('downloads/'):
-        for file in files:
-            if file.endswith(constants.PARTIAL_DOWNLOAD_EXT):
-                os.remove(os.path.join(root, file))
+    return 'downloads/' + clean_dir_name + '/' + str(postid) + '.' + ext

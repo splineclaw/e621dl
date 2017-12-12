@@ -35,7 +35,7 @@ You must install all of this program's python dependencies for it to run properl
 *You must run your command shell with admin/sudo permissions for the installation of new packages to be successful.*
 
 The required packages for **e621dl** are currently:
-    - [requests](https://python-requests.org)
+- [requests](https://python-requests.org)
 
 - Open your command shell in the directory you decompressed e621dl into, and run the command `py e621dl.py`. Depending on your system, the command `py` may default to Python 2. In this case you should run `py -3 e621dl.py`. Sometimes, your system may not recognize the `py` command at all. In this case you should run `python3 e621dl.py`. In some cases where Python 3 was the first installed version of Python, the command `python e621dl.py` will be used.
     - The most common error that occurs when running a Python 3 program in Python 2 is `SyntaxError: Missing parentheses in call to 'print'`.

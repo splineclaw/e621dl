@@ -1,5 +1,5 @@
 from . import local, constants
-from os import rename
+import os
 
 def get_github_release(session):
     url = 'https://api.github.com/repos/wulfre/e621dl/releases/latest'
@@ -13,6 +13,11 @@ def get_posts(search_string, min_score, earliest_date, page_number, max_results,
         ' score:>=' + str(min_score) + \
         '&page=' + str(page_number) + \
         '&limit=' + str(max_results)
+
+    return session.get(url).json()
+
+def get_known_post(id, session):
+    url = 'https://e621.net/post/show.json?id=' + id
 
     return session.get(url).json()
 
@@ -53,12 +58,28 @@ def get_tag_alias(user_tag, session):
             return prefix + response['name']
 
     local.print_log('remote', 'error', 'The tag ' + prefix + user_tag + ' is spelled incorrectly or does not exist.')
-    exit()
+    raise SystemExit
 
 def download_post(url, path, session):
     temp_path = path + '.' + constants.PARTIAL_DOWNLOAD_EXT
 
     with open(temp_path, 'wb') as outfile:
-        for chunk in session.get(url, stream = True).iter_content(chunk_size = 1024):
+        for chunk in session.get(url, stream = True).iter_content(chunk_size = constants.REQUEST_CHUNK_SIZE):
             outfile.write(chunk)
-    rename(temp_path, path)
+    os.rename(temp_path, path)
+
+def finish_partial_downloads(session):
+    for root, dirs, files in os.walk('downloads/'):
+        for file in files:
+            if file.endswith(constants.PARTIAL_DOWNLOAD_EXT):
+                local.print_log('remote', 'info', 'Partial download found: ' + file + '. Finishing download.')
+
+                path = os.path.join(root, file)
+
+                with open(path, 'ab') as outfile:
+                    header = {'Range':'bytes=' + str(os.path.getsize(path)) + '-'}
+                    url = get_known_post(file.split('.')[0], session)['file_url']
+
+                    for chunk in session.get(url, stream = True, headers = header).iter_content(chunk_size = constants.REQUEST_CHUNK_SIZE):
+                        outfile.write(chunk)
+                os.rename(path, path.replace('.' + constants.PARTIAL_DOWNLOAD_EXT, ''))

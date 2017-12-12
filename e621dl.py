@@ -17,7 +17,15 @@ if __name__ == '__main__':
 
         local.print_log('e621dl', 'info', 'Running e621dl version ' + constants.VERSION + '.')
 
-        local.delete_partial_downloads()
+        print('')
+
+        local.print_log('e621dl', 'info', 'Checking for partial downloads.')
+
+        remote.finish_partial_downloads(session)
+
+        print('')
+
+        local.print_log('e621dl', 'info', 'Parsing config.')
 
         config = local.get_config()
 
@@ -27,9 +35,6 @@ if __name__ == '__main__':
         default_date = local.get_date(1)
         default_score = -sys.maxsize
         default_ratings = ['s']
-
-        print('')
-        local.print_log('e621dl', 'info', 'Parsing config.')
 
         for section in config.sections():
             section_tags = []
@@ -97,7 +102,7 @@ if __name__ == '__main__':
                 results.append({'id':dummy_id, 'md5':dummy_id, 'file_ext':dummy_id})
 
                 for post in results:
-                    path = local.make_path(directory, [post['id'], post['md5'], post['file_ext']])
+                    path = local.make_path(directory, post['id'], post['file_ext'])
 
                     if post['id'] == dummy_id:
                         pass
