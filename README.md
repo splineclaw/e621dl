@@ -31,24 +31,18 @@ Once it knows these things, it goes through the searches one by one, and downloa
 
 ## Running **e621dl** from source.
 
-- Open your terminal/command line in the directory you decompressed e621dl into, and run the command `py e621dl.py`. Depending on your system, the command `py` may default to Python 2. In this case you should run `py -3 e621dl.py`. Sometimes, your system may not recognize the `py` command at all. In this case you should run `python3 e621dl.py`. In some cases where Python 3 was the first installed version of Python, the command `python e621dl.py` will be used.
+You must install all of this program's python dependencies for it to run properly from source. They can be installed by running the following command in your command shell: `pip install [package name]`.
+*You must run your command shell with admin/sudo permissions for the installation of new packages to be successful.*
+
+The required packages for **e621dl** are currently:
+    - [requests](https://python-requests.org)
+
+- Open your command shell in the directory you decompressed e621dl into, and run the command `py e621dl.py`. Depending on your system, the command `py` may default to Python 2. In this case you should run `py -3 e621dl.py`. Sometimes, your system may not recognize the `py` command at all. In this case you should run `python3 e621dl.py`. In some cases where Python 3 was the first installed version of Python, the command `python e621dl.py` will be used.
     - The most common error that occurs when running a Python 3 program in Python 2 is `SyntaxError: Missing parentheses in call to 'print'`.
 
 ## First Run
 
-The first time you run **e621dl**, you may see the following prompt, this will only occur if you are running from source:
-
-```
-You are missing at least one required package. Would you like to install missing packages? (y/n):
-```
-
-Saying yes to this prompt will install the required packages for running **e621dl** through pip. Pip is normally installed alongside python unless a custom installation is done.
-    - _You must run your command shell with admin/sudo permissions for the installation of new packages to be successful._
-
-The required packages for **e621dl** are currently:
-- [requests](https://python-requests.org)
-
-If you agree, **e621dl** will continue to run, and you will see:
+The first time you run **e621dl**, you will see the following errors:
 
 ```
 e621dl      INFO     Running e621dl version X.X.X -- Forked from 2.4.6.
@@ -119,9 +113,9 @@ score = -9999999
 Once you have added at least one group to the tags file, you should see something similar to this when you run **e621dl**:
 
 ```
-e621dl      INFO     Running e621dl version X.X.X -- Forked from 2.4.6.
+e621dl      INFO     Running e621dl version X.X.X.
 
-e621dl      INFO     Aliasing tags.
+e621dl      INFO     Parsing config.
 remote      INFO     Tag aliased: bad_tag -> good_tag
 
 ┌───────────────────────────────────────────────────────────────┐
