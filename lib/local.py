@@ -1,9 +1,4 @@
-import argparse
-import configparser
-import logging
-import os
-import datetime
-
+import argparse, configparser, logging, os, datetime
 from . import constants
 
 def get_verbosity():
@@ -72,3 +67,9 @@ def make_path(dir_name, post):
         os.makedirs('downloads/' + clean_dir_name)
 
     return 'downloads/' + clean_dir_name + '/' + str(post[0]) + '-' + post[1] + '.' + post[2]
+
+def delete_partial_downloads():
+    for root, dirs, files in os.walk('downloads/'):
+        for file in files:
+            if file.endswith(constants.PARTIAL_DOWNLOAD_EXT):
+                os.remove(os.path.join(root, file))

@@ -17,17 +17,19 @@ if __name__ == '__main__':
 
         local.print_log('e621dl', 'info', 'Running e621dl version ' + constants.VERSION + '.')
 
+        local.delete_partial_downloads()
+
         config = local.get_config()
 
         blacklist = []
         tag_groups = []
 
         default_date = local.get_date(1)
-        default_score = -9999999
+        default_score = -sys.maxsize
         default_ratings = ['s']
 
         print('')
-        local.print_log('e621dl', 'info', 'Aliasing tags.')
+        local.print_log('e621dl', 'info', 'Parsing config.')
 
         for section in config.sections():
             section_tags = []
@@ -91,10 +93,15 @@ if __name__ == '__main__':
             for i in count(start = 1):
                 results = remote.get_posts(search_string, min_score, earliest_date, i, constants.MAX_RESULTS, session)
 
+                dummy_id = 'Q'
+                results.append({'id':dummy_id, 'md5':dummy_id, 'file_ext':dummy_id})
+
                 for post in results:
                     path = local.make_path(directory, [post['id'], post['md5'], post['file_ext']])
 
-                    if os.path.isfile(path):
+                    if post['id'] == dummy_id:
+                        pass
+                    elif os.path.isfile(path):
                         in_storage += 1
                     elif post['rating'] not in ratings:
                         bad_rating += 1
@@ -112,13 +119,6 @@ if __name__ == '__main__':
                         ), end='\r', flush=True)
 
                 if len(results) < constants.MAX_RESULTS:
-                    # I know that it's bad to copy and paste code, but I'm having a hard time printing this row when there are no results.
-                    if (downloaded + in_storage + bad_rating + blacklisted + bad_tag) == 0:
-                        print('│ {:^{width0}} │ {:^{width1}} │ {:^{width2}} │ {:^{width3}} │ {:^{width4}} │'.format(
-                        '0', '0', '0', '0', '0',
-                        width0 = len(col_titles[0]), width1 = len(col_titles[1]), width2 = len(col_titles[2]), width3 = len(col_titles[3]), width4 = len(col_titles[4])
-                        ), end='\r', flush=True)
-
                     print('')
                     print('└─' + '─' * len(col_titles[0]) + '─┴─' + '─' * len(col_titles[1]) + '─┴─' + '─' * len(col_titles[2]) + '─┴─' + '─' * len(col_titles[3]) + '─┴─' + '─' * len(col_titles[4]) + '─┘')
 

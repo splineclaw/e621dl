@@ -1,4 +1,5 @@
-from . import local
+from . import local, constants
+from os import rename
 
 def get_github_release(session):
     url = 'https://api.github.com/repos/wulfre/e621dl/releases/latest'
@@ -55,6 +56,9 @@ def get_tag_alias(user_tag, session):
     exit()
 
 def download_post(url, path, session):
-    with open(path, 'wb') as outfile:
+    temp_path = path + '.' + constants.PARTIAL_DOWNLOAD_EXT
+
+    with open(temp_path, 'wb') as outfile:
         for chunk in session.get(url, stream = True).iter_content(chunk_size = 1024):
             outfile.write(chunk)
+    rename(temp_path, path)
