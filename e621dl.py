@@ -98,13 +98,13 @@ if __name__ == '__main__':
             last_id = sys.maxsize
 
             while True:
-                results = remote.get_posts(search_string, min_score, earliest_date, last_id, constants.MAX_RESULTS, session)
+                results = remote.get_posts(search_string, min_score, earliest_date, last_id, session)
                 last_id = results[-1]['id']
 
                 # This dummy result makes sure that the for loop is always executed even for 0 real results.
                 # This is so the table will print 0.
                 dummy_id = 'Q'
-                results.append({'id':dummy_id, 'file_ext':dummy_id})
+                results.append({'id': dummy_id, 'file_ext': dummy_id})
 
                 for post in results:
                     path = local.make_path(directory, post['id'], post['file_ext'])

@@ -8,22 +8,20 @@ def get_github_release(session):
 
     return response.json()['tag_name'].strip('v')
 
-def get_posts(search_string, min_score, earliest_date, last_id, max_results, session):
-    url = 'https://e621.net/post/index.json?' + \
-        'tags=' + search_string + \
-        '+date:>=' + str(earliest_date) + \
-        '+score:>=' + str(min_score) + \
-        '&before_id=' + str(last_id) + \
-        '&limit=' + str(max_results)
+def get_posts(search_string, min_score, earliest_date, last_id, session):
+    url = 'https://e621.net/post/index.json'
+    payload = {'limit': constants.MAX_RESULTS, 'before_id': str(last_id), 'tags': 'score:>=' + str(min_score) + ' ' + 'date:>=' + str(earliest_date) + ' ' + search_string}
 
-    response = session.get(url)
+    response = session.post(url, data = payload)
     response.raise_for_status()
 
     return response.json()
 
-def get_known_post(id, session):
-    url = 'https://e621.net/post/show.json?id=' + id
-    response = session.get(url)
+def get_known_post(post_id, session):
+    url = 'https://e621.net/post/show.json'
+    payload = {'id': post_id}
+
+    response = session.post(url, data = payload)
     response.raise_for_status()
 
     return response.json()
@@ -42,8 +40,10 @@ def get_tag_alias(user_tag, session):
         prefix = '-'
         user_tag = user_tag[1:]
 
-    url = 'https://e621.net/tag/index.json?name=' + user_tag
-    response = session.get(url)
+    url = 'https://e621.net/tag/index.json'
+    payload = {'name': user_tag}
+
+    response = session.post(url, data = payload)
     response.raise_for_status()
 
     results = response.json()
@@ -55,16 +55,20 @@ def get_tag_alias(user_tag, session):
         if user_tag == tag['name']:
             return prefix + user_tag
 
-    url = 'https://e621.net/tag_alias/index.json?query=' + user_tag + '&approved=true'
-    response = session.get(url)
+    url = 'https://e621.net/tag_alias/index.json'
+    payload = {'approved': 'true', 'query': user_tag}
+
+    response = session.post(url, data = payload)
     response.raise_for_status()
 
     results = response.json()
 
     for tag in results:
         if user_tag == tag['name']:
-            url = 'https://e621.net/tag/show.json?id=' + str(tag['alias_id'])
-            response = session.get(url)
+            url = 'https://e621.net/tag/show.json'
+            payload = {'id': str(tag['alias_id'])}
+
+            response = session.post(url, data = payload)
             response.raise_for_status()
 
             results = response.json()
