@@ -12,6 +12,9 @@ DEFAULT_CONFIG_TEXT = ''';;;;;;;;;;;;;;
 ;; GENERAL  ;;
 ;;;;;;;;;;;;;;
 
+[Other]
+include_md5 = false
+
 [Defaults]
 days = 1
 ratings = s

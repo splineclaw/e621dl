@@ -60,10 +60,10 @@ def substitute_illegals(char):
 
     return '_' if char in illegals else char
 
-def make_path(dir_name, postid, ext):
+def make_path(dir_name, filename, ext):
     clean_dir_name = ''.join([substitute_illegals(char) for char in dir_name]).lower()
 
     if not os.path.isdir('downloads/' + clean_dir_name):
         os.makedirs('downloads/' + clean_dir_name)
 
-    return 'downloads/' + clean_dir_name + '/' + str(postid) + '.' + ext
+    return 'downloads/' + clean_dir_name + '/' + filename + '.' + ext

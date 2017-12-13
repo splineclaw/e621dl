@@ -29,6 +29,7 @@ if __name__ == '__main__':
 
         config = local.get_config()
 
+        include_md5 = False
         blacklist = []
         tag_groups = []
 
@@ -42,25 +43,30 @@ if __name__ == '__main__':
             section_score = default_score
             section_ratings = default_ratings
 
-            if section.lower() == 'defaults':
+            if section.lower() == 'other':
                 for option, value in config.items(section):
-                    if option in {'days_to_check', 'days'}:
+                    if option.lower() == 'include_md5':
+                        if value.lower() == 'true':
+                            include_md5 = True
+            elif section.lower() == 'defaults':
+                for option, value in config.items(section):
+                    if option.lower() in {'days_to_check', 'days'}:
                         default_date = local.get_date(int(value))
-                    elif option in {'min_score', 'score'}:
+                    elif option.lower() in {'min_score', 'score'}:
                         default_score = int(value)
-                    elif option in {'ratings', 'rating'}:
+                    elif option.lower() in {'ratings', 'rating'}:
                         default_ratings = value.replace(',', ' ').lower().strip().split()
             elif section.lower() == 'blacklist':
                 blacklist = [remote.get_tag_alias(tag.lower(), session) for tag in config.get(section, 'tags').replace(',', ' ').lower().strip().split()]
             else:
                 for option, value in config.items(section):
-                    if option in {'tags', 'tag'}:
+                    if option.lower() in {'tags', 'tag'}:
                         section_tags = [remote.get_tag_alias(tag.lower(), session) for tag in value.replace(',', ' ').lower().strip().split()]
-                    elif option in {'days_to_check', 'days'}:
+                    elif option.lower() in {'days_to_check', 'days'}:
                         section_date = local.get_date(int(value))
-                    elif option in {'min_score', 'score'}:
+                    elif option.lower() in {'min_score', 'score'}:
                         section_score = int(value)
-                    elif option in {'ratings', 'rating'}:
+                    elif option.lower() in {'ratings', 'rating'}:
                         section_ratings = value.replace(',', ' ').lower().strip().split()
 
                 tag_groups.append([section, section_tags, section_ratings, section_score, section_date])
@@ -104,10 +110,14 @@ if __name__ == '__main__':
                 # This dummy result makes sure that the for loop is always executed even for 0 real results.
                 # This is so the table will print 0.
                 dummy_id = 'Q'
-                results.append({'id': dummy_id, 'file_ext': dummy_id})
+                results.append({'id': dummy_id, 'md5': dummy_id, 'file_ext': dummy_id})
 
                 for post in results:
-                    path = local.make_path(directory, post['id'], post['file_ext'])
+                    if include_md5:
+                        path = local.make_path(directory, str(post['id']) + '.' + str(post['md5']), post['file_ext'])
+                    else:
+                        path = local.make_path(directory, str(post['id']), post['file_ext'])
+
 
                     if post['id'] == dummy_id:
                         pass
