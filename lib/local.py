@@ -18,7 +18,7 @@ def get_verbosity():
     return logging.INFO
 
 def init_log():
-    logging.basicConfig(level=get_verbosity(), format=constants.LOGGER_FORMAT)
+    logging.basicConfig(level = get_verbosity(), format = constants.LOGGER_FORMAT)
     logging.getLogger("requests").setLevel(logging.CRITICAL)
     logging.getLogger("urllib3").setLevel(logging.CRITICAL)
 

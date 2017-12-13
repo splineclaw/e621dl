@@ -3,23 +3,30 @@ import os
 
 def get_github_release(session):
     url = 'https://api.github.com/repos/wulfre/e621dl/releases/latest'
-    response = session.get(url).json()
-    return response['tag_name'].strip('v')
+    response = session.get(url)
+    response.raise_for_status()
 
-def get_posts(search_string, min_score, earliest_date, page_number, max_results, session):
+    return response.json()['tag_name'].strip('v')
+
+def get_posts(search_string, min_score, earliest_date, last_id, max_results, session):
     url = 'https://e621.net/post/index.json?' + \
         'tags=' + search_string + \
-        ' date:>=' + str(earliest_date) + \
-        ' score:>=' + str(min_score) + \
-        '&page=' + str(page_number) + \
+        '+date:>=' + str(earliest_date) + \
+        '+score:>=' + str(min_score) + \
+        '&before_id=' + str(last_id) + \
         '&limit=' + str(max_results)
 
-    return session.get(url).json()
+    response = session.get(url)
+    response.raise_for_status()
+
+    return response.json()
 
 def get_known_post(id, session):
     url = 'https://e621.net/post/show.json?id=' + id
+    response = session.get(url)
+    response.raise_for_status()
 
-    return session.get(url).json()
+    return response.json()
 
 def get_tag_alias(user_tag, session):
     prefix = ''
@@ -36,37 +43,56 @@ def get_tag_alias(user_tag, session):
         user_tag = user_tag[1:]
 
     url = 'https://e621.net/tag/index.json?name=' + user_tag
-    response = session.get(url).json()
+    response = session.get(url)
+    response.raise_for_status()
 
-    if '*' in user_tag and response:
+    results = response.json()
+
+    if '*' in user_tag and results:
         return user_tag
 
-    for tag in response:
+    for tag in results:
         if user_tag == tag['name']:
             return prefix + user_tag
 
     url = 'https://e621.net/tag_alias/index.json?query=' + user_tag + '&approved=true'
-    response = session.get(url).json()
+    response = session.get(url)
+    response.raise_for_status()
 
-    for tag in response:
+    results = response.json()
+
+    for tag in results:
         if user_tag == tag['name']:
             url = 'https://e621.net/tag/show.json?id=' + str(tag['alias_id'])
-            response = session.get(url).json()
+            response = session.get(url)
+            response.raise_for_status()
 
-            local.print_log('remote', 'info', 'Tag aliased: ' + prefix + user_tag + ' -> ' + prefix + response['name'])
+            results = response.json()
 
-            return prefix + response['name']
+            local.print_log('remote', 'info', 'Tag aliased: ' + prefix + user_tag + ' -> ' + prefix + results['name'])
+
+            return prefix + results['name']
 
     local.print_log('remote', 'error', 'The tag ' + prefix + user_tag + ' is spelled incorrectly or does not exist.')
     raise SystemExit
 
 def download_post(url, path, session):
-    temp_path = path + '.' + constants.PARTIAL_DOWNLOAD_EXT
+    if '.' + constants.PARTIAL_DOWNLOAD_EXT not in path:
+        path += '.' + constants.PARTIAL_DOWNLOAD_EXT
 
-    with open(temp_path, 'wb') as outfile:
-        for chunk in session.get(url, stream = True).iter_content(chunk_size = constants.REQUEST_CHUNK_SIZE):
+    try:
+        open(path, 'x')
+    except FileExistsError:
+        pass
+
+    header = {'Range':'bytes=' + str(os.path.getsize(path)) + '-'}
+    response = session.get(url, stream = True, headers = header)
+    response.raise_for_status()
+
+    with open(path, 'ab') as outfile:
+        for chunk in response.iter_content(chunk_size = 8192):
             outfile.write(chunk)
-    os.rename(temp_path, path)
+    os.rename(path, path.replace('.' + constants.PARTIAL_DOWNLOAD_EXT, ''))
 
 def finish_partial_downloads(session):
     for root, dirs, files in os.walk('downloads/'):
@@ -75,11 +101,6 @@ def finish_partial_downloads(session):
                 local.print_log('remote', 'info', 'Partial download found: ' + file + '. Finishing download.')
 
                 path = os.path.join(root, file)
+                url = get_known_post(file.split('.')[0], session)['file_url']
 
-                with open(path, 'ab') as outfile:
-                    header = {'Range':'bytes=' + str(os.path.getsize(path)) + '-'}
-                    url = get_known_post(file.split('.')[0], session)['file_url']
-
-                    for chunk in session.get(url, stream = True, headers = header).iter_content(chunk_size = constants.REQUEST_CHUNK_SIZE):
-                        outfile.write(chunk)
-                os.rename(path, path.replace('.' + constants.PARTIAL_DOWNLOAD_EXT, ''))
+                download_post(url, path, session)

@@ -37,7 +37,7 @@ You must install all of this program's python dependencies for it to run properl
 The required packages for **e621dl** are currently:
 - [requests](https://python-requests.org)
 
-- Open your command shell in the directory you decompressed e621dl into, and run the command `py e621dl.py`. Depending on your system, the command `py` may default to Python 2. In this case you should run `py -3 e621dl.py`. Sometimes, your system may not recognize the `py` command at all. In this case you should run `python3 e621dl.py`. In some cases where Python 3 was the first installed version of Python, the command `python e621dl.py` will be used.
+Open your command shell in the directory you decompressed e621dl into, and run the command `py e621dl.py`. Depending on your system, the command `py` may default to Python 2. In this case you should run `py -3 e621dl.py`. Sometimes, your system may not recognize the `py` command at all. In this case you should run `python3 e621dl.py`. In some cases where Python 3 was the first installed version of Python, the command `python e621dl.py` will be used.
     - The most common error that occurs when running a Python 3 program in Python 2 is `SyntaxError: Missing parentheses in call to 'print'`.
 
 ## First Run
@@ -46,8 +46,8 @@ The first time you run **e621dl**, you will see the following errors:
 
 ```
 e621dl      INFO     Running e621dl version X.X.X -- Forked from 2.4.6.
-config      ERROR    No config file found.
-config      INFO     New default config file created. Please add tag groups to this file.
+local       ERROR    No config file found.
+local       INFO     New default config file created. Please add tag groups to this file.
 ```
 
 These errors are normal behavior for a first run, and should not raise any alarm. **e621dl** is telling you that it was unable to find a `config.ini` file, so a generic one was created.
@@ -115,16 +115,19 @@ Once you have added at least one group to the tags file, you should see somethin
 ```
 e621dl      INFO     Running e621dl version X.X.X.
 
+e621dl      INFO     Checking for partial downloads.
+remote      INFO     Partial download found: id.ext.request. Finishing download.
+
 e621dl      INFO     Parsing config.
 remote      INFO     Tag aliased: bad_tag -> good_tag
 
-┌───────────────────────────────────────────────────────────────┐
-│                            Example                            │
-├─────┬───────────┬─────────────────┬─────────────┬─────────────┤
-│ new │ duplicate │ rating conflict │ blacklisted │ missing tag │
-├─────┼───────────┼─────────────────┼─────────────┼─────────────┤
-│  X  │     X     │        X        │      X      │      X      │
-└─────┴───────────┴─────────────────┴─────────────┴─────────────┘
+┌──────────────────────────────────────────────────────────────────────┐
+│                               Example                                │
+├────────────┬───────────┬─────────────────┬─────────────┬─────────────┤
+│ downloaded │ duplicate │ rating conflict │ blacklisted │ missing tag │
+├────────────┼───────────┼─────────────────┼─────────────┼─────────────┤
+│     X      │     X     │        X        │      X      │      X      │
+└────────────┴───────────┴─────────────────┴─────────────┴─────────────┘
 ```
 
 My intent was to make the column titles as easy to understand as possible, but here is briefly what each column represents.

@@ -74,7 +74,7 @@ if __name__ == '__main__':
             min_score = group[3]
             earliest_date = group[4]
 
-            col_titles = ['new', 'duplicate', 'rating conflict', 'blacklisted', 'missing tag']
+            col_titles = ['downloaded', 'duplicate', 'rating conflict', 'blacklisted', 'missing tag']
             row_len = sum(len(x) for x in col_titles) + ((len(col_titles) * 3) - 1)
 
             print('┌' + '─' * row_len + '┐')
@@ -95,11 +95,16 @@ if __name__ == '__main__':
             print('│ ' + ' │ '.join(col_titles) + ' │')
             print('├─' + '─' * len(col_titles[0]) + '─┼─' + '─' * len(col_titles[1]) + '─┼─' + '─' * len(col_titles[2]) + '─┼─' + '─' * len(col_titles[3]) + '─┼─' + '─' * len(col_titles[4]) + '─┤')
 
-            for i in count(start = 1):
-                results = remote.get_posts(search_string, min_score, earliest_date, i, constants.MAX_RESULTS, session)
+            last_id = sys.maxsize
 
+            while True:
+                results = remote.get_posts(search_string, min_score, earliest_date, last_id, constants.MAX_RESULTS, session)
+                last_id = results[-1]['id']
+
+                # This dummy result makes sure that the for loop is always executed even for 0 real results.
+                # This is so the table will print 0.
                 dummy_id = 'Q'
-                results.append({'id':dummy_id, 'md5':dummy_id, 'file_ext':dummy_id})
+                results.append({'id':dummy_id, 'file_ext':dummy_id})
 
                 for post in results:
                     path = local.make_path(directory, post['id'], post['file_ext'])
@@ -123,7 +128,7 @@ if __name__ == '__main__':
                         width0 = len(col_titles[0]), width1 = len(col_titles[1]), width2 = len(col_titles[2]), width3 = len(col_titles[3]), width4 = len(col_titles[4])
                         ), end='\r', flush=True)
 
-                if len(results) < constants.MAX_RESULTS:
+                if len(results) < constants.MAX_RESULTS + 1: # Max results + 1 to account for the dummy result.
                     print('')
                     print('└─' + '─' * len(col_titles[0]) + '─┴─' + '─' * len(col_titles[1]) + '─┴─' + '─' * len(col_titles[2]) + '─┴─' + '─' * len(col_titles[3]) + '─┴─' + '─' * len(col_titles[4]) + '─┘')
 
