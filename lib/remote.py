@@ -3,6 +3,7 @@ import os
 
 def get_github_release(session):
     url = 'https://api.github.com/repos/wulfre/e621dl/releases/latest'
+
     response = session.get(url)
     response.raise_for_status()
 
@@ -10,7 +11,11 @@ def get_github_release(session):
 
 def get_posts(search_string, min_score, earliest_date, last_id, session):
     url = 'https://e621.net/post/index.json'
-    payload = {'limit': constants.MAX_RESULTS, 'before_id': str(last_id), 'tags': 'score:>=' + str(min_score) + ' ' + 'date:>=' + str(earliest_date) + ' ' + search_string}
+    payload = {
+        'limit':constants.MAX_RESULTS,
+        'before_id':str(last_id),
+        'tags':'score:>=' + str(min_score) + ' ' + 'date:>=' + str(earliest_date) + ' ' + search_string
+        }
 
     response = session.post(url, data = payload)
     response.raise_for_status()
@@ -19,7 +24,7 @@ def get_posts(search_string, min_score, earliest_date, last_id, session):
 
 def get_known_post(post_id, session):
     url = 'https://e621.net/post/show.json'
-    payload = {'id': post_id}
+    payload = {'id':post_id}
 
     response = session.post(url, data = payload)
     response.raise_for_status()
@@ -89,8 +94,8 @@ def download_post(url, path, session):
     except FileExistsError:
         pass
 
-    header = {'Range':'bytes=' + str(os.path.getsize(path)) + '-'}
-    response = session.get(url, stream = True, headers = header)
+    capture = {'Range':'bytes=' + str(os.path.getsize(path)) + '-'}
+    response = session.get(url, stream = True, headers = capture)
     response.raise_for_status()
 
     with open(path, 'ab') as outfile:
