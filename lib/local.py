@@ -31,7 +31,7 @@ def make_config():
         outfile.write(constants.DEFAULT_CONFIG_TEXT)
         print_log('local', 'info', 'New default config file created. Please add tag groups to this file.')
 
-    exit()
+    raise SystemExit
 
 def get_config():
     config = configparser.ConfigParser()

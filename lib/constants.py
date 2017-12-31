@@ -1,4 +1,4 @@
-VERSION = '4.4.0'
+VERSION = '4.4.1'
 VERSION_NOTE = 'Forked from 2.4.6'
 
 LOGGER_FORMAT = '%(name)-11s %(levelname)-8s %(message)s'

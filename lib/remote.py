@@ -4,12 +4,13 @@ from timeit import default_timer
 import os
 
 def delayed_post(url, payload, session):
+    # Take time before and after getting the requests response.
     start = default_timer()
     response = session.post(url, data = payload)
     elapsed = default_timer() - start
 
-    print(url + ' ' + str(elapsed))
-
+    # If the response took less than 0.5 seconds (only 2 requests are allowed per second as per the e621 API)
+    # Wait for the rest of the 0.5 seconds.
     if (elapsed < 0.5):
         sleep(0.5 - elapsed)
 

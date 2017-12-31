@@ -194,3 +194,8 @@ if __name__ == '__main__':
                     print('└─' + '─' * len(col_titles[0]) + '─┴─' + '─' * len(col_titles[1]) + '─┴─' + '─' * len(col_titles[2]) + '─┴─' + '─' * len(col_titles[3]) + '─┴─' + '─' * len(col_titles[4]) + '─┘')
 
                     break
+
+    # End program.
+    print('')
+    input('All searches complete. Press ENTER to exit...')
+    raise SystemExit
