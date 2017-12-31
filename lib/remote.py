@@ -1,5 +1,19 @@
 from . import local, constants
+from time import sleep
+from timeit import default_timer
 import os
+
+def delayed_post(url, payload, session):
+    start = default_timer()
+    response = session.post(url, data = payload)
+    elapsed = default_timer() - start
+
+    print(url + ' ' + str(elapsed))
+
+    if (elapsed < 0.5):
+        sleep(0.5 - elapsed)
+
+    return response
 
 def get_github_release(session):
     url = 'https://api.github.com/repos/wulfre/e621dl/releases/latest'
@@ -17,7 +31,7 @@ def get_posts(search_string, min_score, earliest_date, last_id, session):
         'tags':'score:>=' + str(min_score) + ' ' + 'date:>=' + str(earliest_date) + ' ' + search_string
         }
 
-    response = session.post(url, data = payload)
+    response = delayed_post(url, payload, session)
     response.raise_for_status()
 
     return response.json()
@@ -26,7 +40,7 @@ def get_known_post(post_id, session):
     url = 'https://e621.net/post/show.json'
     payload = {'id':post_id}
 
-    response = session.post(url, data = payload)
+    response = delayed_post(url, payload, session)
     response.raise_for_status()
 
     return response.json()
@@ -48,7 +62,7 @@ def get_tag_alias(user_tag, session):
     url = 'https://e621.net/tag/index.json'
     payload = {'name': user_tag}
 
-    response = session.post(url, data = payload)
+    response = delayed_post(url, payload, session)
     response.raise_for_status()
 
     results = response.json()
@@ -63,7 +77,7 @@ def get_tag_alias(user_tag, session):
     url = 'https://e621.net/tag_alias/index.json'
     payload = {'approved': 'true', 'query': user_tag}
 
-    response = session.post(url, data = payload)
+    response = delayed_post(url, payload, session)
     response.raise_for_status()
 
     results = response.json()
@@ -73,7 +87,7 @@ def get_tag_alias(user_tag, session):
             url = 'https://e621.net/tag/show.json'
             payload = {'id': str(tag['alias_id'])}
 
-            response = session.post(url, data = payload)
+            response = delayed_post(url, payload, session)
             response.raise_for_status()
 
             results = response.json()
@@ -94,13 +108,14 @@ def download_post(url, path, session):
     except FileExistsError:
         pass
 
-    capture = {'Range':'bytes=' + str(os.path.getsize(path)) + '-'}
-    response = session.get(url, stream = True, headers = capture)
+    header = {'Range':'bytes=' + str(os.path.getsize(path)) + '-'}
+    response = session.get(url, stream = True, headers = header)
     response.raise_for_status()
 
     with open(path, 'ab') as outfile:
         for chunk in response.iter_content(chunk_size = 8192):
             outfile.write(chunk)
+
     os.rename(path, path.replace('.' + constants.PARTIAL_DOWNLOAD_EXT, ''))
 
 def finish_partial_downloads(session):
