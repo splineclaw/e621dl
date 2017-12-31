@@ -1,19 +1,21 @@
 #!/usr/bin/env python3
 
 # Internal Imports
-import os, sys, requests
-from fnmatch import fnmatch
-from itertools import count
+import os
 from distutils.version import StrictVersion
+from fnmatch import fnmatch
 
 # External Imports
+import requests
+
+# Personal Imports
 from lib import constants, local, remote
 
 # This block will only be read if e621dl.py is directly executed by python. Not if it is imported.
 if __name__ == '__main__':
 
     # Create the requests session that will be used throughout the run and set the user-agent.
-    # The user-agent requirements are sepcified at (https://e621.net/help/show/api#basics).
+    # The user-agent requirements are specified at (https://e621.net/help/show/api#basics).
     with requests.Session() as session:
         session.headers['User-Agent'] = constants.USER_AGENT
 
@@ -44,7 +46,7 @@ if __name__ == '__main__':
         # Initialize user configured options in case any are missing.
         include_md5 = False # The md5 checksum is not appended to file names.
         default_date = local.get_date(1) # Get posts from one day before execution.
-        default_score = -2147483647 # Allow posts of any score to be downloaded.
+        default_score = -0x7FFFFFFF # Allow posts of any score to be downloaded.
         default_ratings = ['s'] # Allow only safe posts to be downloaded.
 
         # Iterate through all sections (lines enclosed in brackets: []).
@@ -141,7 +143,7 @@ if __name__ == '__main__':
 
             # Initializes last_id (the last post found in a search) to an enormous number so that the newest post will be found.
             # This number is hard-coded because on 64-bit archs, sys.maxsize() will return a number too big for e621 to use.
-            last_id = 2147483647
+            last_id = 0x7FFFFFFF
 
             # Sets up a loop that will continue indefinitely until the last post of a search has been found.
             while True:
@@ -186,7 +188,7 @@ if __name__ == '__main__':
                     print('│ {:^{width0}} │ {:^{width1}} │ {:^{width2}} │ {:^{width3}} │ {:^{width4}} │'.format(
                         str(downloaded), str(in_storage), str(bad_rating), str(blacklisted), str(bad_tag),
                         width0 = len(col_titles[0]), width1 = len(col_titles[1]), width2 = len(col_titles[2]), width3 = len(col_titles[3]), width4 = len(col_titles[4])
-                        ), end='\r', flush=True)
+                        ), end = '\r', flush = True)
 
                 # Print bottom of table. Break while loop. End program.
                 if last_id == 0:

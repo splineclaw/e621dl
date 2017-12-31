@@ -1,7 +1,10 @@
-from . import local, constants
+# Internal Imports
+import os
 from time import sleep
 from timeit import default_timer
-import os
+
+# Personal Imports
+from . import local, constants
 
 def delayed_post(url, payload, session):
     # Take time before and after getting the requests response.
@@ -11,7 +14,7 @@ def delayed_post(url, payload, session):
 
     # If the response took less than 0.5 seconds (only 2 requests are allowed per second as per the e621 API)
     # Wait for the rest of the 0.5 seconds.
-    if (elapsed < 0.5):
+    if elapsed < 0.5:
         sleep(0.5 - elapsed)
 
     return response
@@ -27,10 +30,10 @@ def get_github_release(session):
 def get_posts(search_string, min_score, earliest_date, last_id, session):
     url = 'https://e621.net/post/index.json'
     payload = {
-        'limit':constants.MAX_RESULTS,
-        'before_id':str(last_id),
-        'tags':'score:>=' + str(min_score) + ' ' + 'date:>=' + str(earliest_date) + ' ' + search_string
-        }
+        'limit': constants.MAX_RESULTS,
+        'before_id': str(last_id),
+        'tags': 'score:>=' + str(min_score) + ' ' + 'date:>=' + str(earliest_date) + ' ' + search_string
+    }
 
     response = delayed_post(url, payload, session)
     response.raise_for_status()
@@ -39,7 +42,7 @@ def get_posts(search_string, min_score, earliest_date, last_id, session):
 
 def get_known_post(post_id, session):
     url = 'https://e621.net/post/show.json'
-    payload = {'id':post_id}
+    payload = {'id': post_id}
 
     response = delayed_post(url, payload, session)
     response.raise_for_status()
@@ -109,7 +112,7 @@ def download_post(url, path, session):
     except FileExistsError:
         pass
 
-    header = {'Range':'bytes=' + str(os.path.getsize(path)) + '-'}
+    header = {'Range': 'bytes=' + str(os.path.getsize(path)) + '-'}
     response = session.get(url, stream = True, headers = header)
     response.raise_for_status()
 

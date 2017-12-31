@@ -1,5 +1,12 @@
-import argparse, configparser, logging, os, datetime
-from . import constants, remote
+# Internal Imports
+import argparse
+import configparser
+import datetime
+import logging
+import os
+
+# Personal Imports
+from . import constants
 
 def get_verbosity():
     parser = argparse.ArgumentParser(prog = 'e621dl', description = 'An automated e621 downloader.')
@@ -19,8 +26,8 @@ def get_verbosity():
 
 def init_log():
     logging.basicConfig(level = get_verbosity(), format = constants.LOGGER_FORMAT)
-    logging.getLogger("requests").setLevel(logging.CRITICAL)
-    logging.getLogger("urllib3").setLevel(logging.CRITICAL)
+    logging.getLogger('requests').setLevel(logging.CRITICAL)
+    logging.getLogger('urllib3').setLevel(logging.CRITICAL)
 
 def print_log(module, log_level, log_message):
     log = logging.getLogger(module)
