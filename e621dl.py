@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 # Internal Imports
 import os
 from distutils.version import StrictVersion
@@ -9,7 +7,9 @@ from fnmatch import fnmatch
 import requests
 
 # Personal Imports
-from lib import constants, local, remote
+from lib import constants
+from lib import local
+from lib import remote
 
 # This block will only be read if e621dl.py is directly executed by python. Not if it is imported.
 if __name__ == '__main__':

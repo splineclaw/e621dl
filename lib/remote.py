@@ -4,7 +4,8 @@ from time import sleep
 from timeit import default_timer
 
 # Personal Imports
-from . import local, constants
+from . import constants
+from . import local
 
 def delayed_post(url, payload, session):
     # Take time before and after getting the requests response.
