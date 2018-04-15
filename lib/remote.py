@@ -54,6 +54,7 @@ def get_tag_alias(user_tag, session):
     prefix = ''
 
     if ':' in user_tag:
+        print('[!] It is not possible to check if (' + user_tag + ') is valid.')
         return user_tag
 
     if user_tag[0] == '~':
@@ -73,10 +74,12 @@ def get_tag_alias(user_tag, session):
     results = response.json()
 
     if '*' in user_tag and results:
+        print('[✓] The tag (' + user_tag + ') is valid.')
         return user_tag
 
     for tag in results:
         if user_tag == tag['name']:
+            print('[✓] The tag (' + prefix + user_tag + ') is valid.')
             return prefix + user_tag
 
     url = 'https://e621.net/tag_alias/index.json'
@@ -97,11 +100,11 @@ def get_tag_alias(user_tag, session):
 
             results = response.json()
 
-            local.print_log('remote', 'info', 'Tag aliased: ' + prefix + user_tag + ' -> ' + prefix + results['name'])
+            print('[✓] The tag (' + prefix + user_tag + ') was changed to (' + prefix + results['name'] + ').')
 
             return prefix + results['name']
 
-    local.print_log('remote', 'error', 'The tag ' + prefix + user_tag + ' is spelled incorrectly or does not exist.')
+    print('[!] The tag ' + prefix + user_tag + ' is spelled incorrectly or does not exist.')
     raise SystemExit
 
 def download_post(url, path, session):
@@ -127,7 +130,7 @@ def finish_partial_downloads(session):
     for root, dirs, files in os.walk('downloads/'):
         for file in files:
             if file.endswith(constants.PARTIAL_DOWNLOAD_EXT):
-                local.print_log('remote', 'info', 'Partial download found: ' + file + '. Finishing download.')
+                print('[!] Partial download (' + file + ') found.')
 
                 path = os.path.join(root, file)
                 url = get_known_post(file.split('.')[0], session)['file_url']

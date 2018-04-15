@@ -18,24 +18,22 @@ if __name__ == '__main__':
     # The user-agent requirements are specified at (https://e621.net/help/show/api#basics).
     with requests.Session() as session:
         session.headers['User-Agent'] = constants.USER_AGENT
-
-        local.init_log()
-
+        
         # Check if a new version is released on github. If so, notify the user.
         if StrictVersion(constants.VERSION) < StrictVersion(remote.get_github_release(session)):
-            local.print_log('e621dl', 'info', 'A NEW VERSION OF E621DL IS AVAILABLE ON GITHUB: (https://github.com/Wulfre/e621dl/releases/latest).')
+            print('A NEW VERSION OF E621DL IS AVAILABLE ON GITHUB: (https://github.com/Wulfre/e621dl/releases/latest).')
 
-        local.print_log('e621dl', 'info', 'Running e621dl version ' + constants.VERSION + '.')
+        print('[i] Running e621dl version ' + constants.VERSION + '.')
 
         print('')
 
-        local.print_log('e621dl', 'info', 'Checking for partial downloads.')
+        print('[i] Checking for partial downloads...')
 
         remote.finish_partial_downloads(session)
 
         print('')
 
-        local.print_log('e621dl', 'info', 'Parsing config.')
+        print('[i] Parsing config...')
 
         config = local.get_config()
 
@@ -199,5 +197,5 @@ if __name__ == '__main__':
 
     # End program.
     print('')
-    input('All searches complete. Press ENTER to exit...')
+    input('[✓] All searches complete. Press ENTER to exit...')
     raise SystemExit
