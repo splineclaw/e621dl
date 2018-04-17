@@ -45,6 +45,7 @@ if __name__ == '__main__':
         include_md5 = False # The md5 checksum is not appended to file names.
         default_date = local.get_date(1) # Get posts from one day before execution.
         default_score = -0x7FFFFFFF # Allow posts of any score to be downloaded.
+        default_favs = 0
         default_ratings = ['s'] # Allow only safe posts to be downloaded.
 
         # Iterate through all sections (lines enclosed in brackets: []).
@@ -64,6 +65,8 @@ if __name__ == '__main__':
                         default_date = local.get_date(int(value))
                     elif option.lower() in {'min_score', 'score'}:
                         default_score = int(value)
+                    elif option.lower() in {'min_favs', 'favs'}:
+                        default_favs = int(value)
                     elif option.lower() in {'ratings', 'rating'}:
                         default_ratings = value.replace(',', ' ').lower().strip().split()
 
@@ -80,6 +83,7 @@ if __name__ == '__main__':
                 # Default options are set in case the user did not declare any for the specific section.
                 section_date = default_date
                 section_score = default_score
+                section_favs = default_favs
                 section_ratings = default_ratings
 
                 # Go through each option within the section to find search related values.
@@ -94,12 +98,14 @@ if __name__ == '__main__':
                         section_date = local.get_date(int(value))
                     elif option.lower() in {'min_score', 'score'}:
                         section_score = int(value)
+                    elif option.lower() in {'min_favs', 'favs'}:
+                        section_favs = int(value)
                     elif option.lower() in {'ratings', 'rating'}:
                         section_ratings = value.replace(',', ' ').lower().strip().split()
 
                 # Append the final values that will be used for the specific section to the list of searches.
                 # Note section_tags is a list within a list.
-                searches.append([section, section_tags, section_ratings, section_score, section_date])
+                searches.append([section, section_tags, section_ratings, section_score, section_favs, section_date])
 
         for search in searches:
             print('')
@@ -109,33 +115,36 @@ if __name__ == '__main__':
             tags = search[1]
             ratings = search[2]
             min_score = search[3]
-            earliest_date = search[4]
+            min_favs = search[4]
+            earliest_date = search[5]
 
             # Create the list that holds the title of each column in the search result table.
             # Keeping the titles in a list allows the use of list comprehension and the sum function.
-            col_titles = ['downloaded', 'duplicate', 'rating conflict', 'blacklisted', 'missing tag']
+            col_titles = ['downloaded', 'duplicate', 'rating conflict', 'blacklisted', 'missing tag', 'low score', 'low favorites']
 
             # Calculates the length of a row in the search results table including spacers so that text can be centered.
             row_len = sum(len(x) for x in col_titles) + ((len(col_titles) * 3) - 1)
 
             # Prints the title of the search, the titles of the results columns, and the table around it.
-            print('┌' + '─' * row_len + '┐')
-            print('│{:^{width}}│'.format(directory, width = row_len))
-            print('├─' + '─' * len(col_titles[0]) + '─┬─' + '─' * len(col_titles[1]) + '─┬─' + '─' * len(col_titles[2]) + '─┬─' + '─' * len(col_titles[3]) + '─┬─' + '─' * len(col_titles[4]) + '─┤')
-            print('│ ' + ' │ '.join(col_titles) + ' │')
-            print('├─' + '─' * len(col_titles[0]) + '─┼─' + '─' * len(col_titles[1]) + '─┼─' + '─' * len(col_titles[2]) + '─┼─' + '─' * len(col_titles[3]) + '─┼─' + '─' * len(col_titles[4]) + '─┤')
+            #print('┌' + '─' * row_len + '┐')
+            #print('│{:^{width}}│'.format(directory, width = row_len))
+            #print('├─' + '─' * len(col_titles[0]) + '─┬─' + '─' * len(col_titles[1]) + '─┬─' + '─' * len(col_titles[2]) + '─┬─' + '─' * len(col_titles[3]) + '─┬─' + '─' * len(col_titles[4]) + '─┬─' + '─' * len(col_titles[5]) + '─┬─' + '─' * len(col_titles[6]) + '─┤')
+            #print('│ ' + ' │ '.join(col_titles) + ' │')
+            #print('├─' + '─' * len(col_titles[0]) + '─┼─' + '─' * len(col_titles[1]) + '─┼─' + '─' * len(col_titles[2]) + '─┼─' + '─' * len(col_titles[3]) + '─┼─' + '─' * len(col_titles[4]) + '─┼─' + '─' * len(col_titles[5]) + '─┼─' + '─' * len(col_titles[6]) + '─┤')
 
             # Initializes the results of each post in the search.
             in_storage = 0
             bad_rating = 0
             blacklisted = 0
             bad_tag = 0
+            bad_score = 0
+            bad_fav_count = 0
             downloaded = 0
 
             # Creates the string to be sent to the API.
-            # Currently only 4 items can be sent directly so the rest are discarded to be filtered out later.
-            if len(tags) > 4:
-                search_string = ' '.join(tags[:4])
+            # Currently only 5 items can be sent directly so the rest are discarded to be filtered out later.
+            if len(tags) > 5:
+                search_string = ' '.join(tags[:5])
             else:
                 search_string = ' '.join(tags)
 
@@ -145,7 +154,8 @@ if __name__ == '__main__':
 
             # Sets up a loop that will continue indefinitely until the last post of a search has been found.
             while True:
-                results = remote.get_posts(search_string, min_score, earliest_date, last_id, session)
+                print('[i] Getting posts...')
+                results = remote.get_posts(search_string, earliest_date, last_id, session)
 
                 # Gets the id of the last post found in the search so that the search can continue.
                 # If the number of results is less than the max, the next searches will always return 0 results.
@@ -169,29 +179,40 @@ if __name__ == '__main__':
                     if post['id'] == dummy_id:
                         pass
                     elif os.path.isfile(path):
+                        print('[✗] Post ' + str(post['id']) + ' was already downloaded.')
                         in_storage += 1
                     elif post['rating'] not in ratings:
+                        print('[✗] Post ' + str(post['id']) + ' does not have a requested rating.')
                         bad_rating += 1
 
                     # Using fnmatch allows for wildcards to be properly filtered.
                     elif [x for x in post['tags'].split() if any(fnmatch(x, y) for y in blacklist)]:
+                        print('[✗] Post ' + str(post['id']) + ' contains a blacklisted tag.')
                         blacklisted += 1
                     elif not set(tags[4:]).issubset(post['tags'].split()):
+                        print('[✗] Post ' + str(post['id']) + ' is missing a requested tag.')
                         bad_tag += 1
+                    elif int(post['score']) < min_score:
+                        print('[✗] Post ' + str(post['id']) + ' has a low score.')
+                        bad_score += 1
+                    elif int(post['fav_count']) < min_favs:
+                        print('[✗] Post ' + str(post['id']) + ' has a low favorite count.')
+                        bad_fav_count += 1
                     else:
+                        print('[✓] Post ' + str(post['id']) + ' is being downloaded.')
                         downloaded += 1
                         remote.download_post(post['file_url'], path, session)
 
                     # Prints the numerical values of the search results.
-                    print('│ {:^{width0}} │ {:^{width1}} │ {:^{width2}} │ {:^{width3}} │ {:^{width4}} │'.format(
-                        str(downloaded), str(in_storage), str(bad_rating), str(blacklisted), str(bad_tag),
-                        width0 = len(col_titles[0]), width1 = len(col_titles[1]), width2 = len(col_titles[2]), width3 = len(col_titles[3]), width4 = len(col_titles[4])
-                        ), end = '\r', flush = True)
+                    #print('│ {:^{width0}} │ {:^{width1}} │ {:^{width2}} │ {:^{width3}} │ {:^{width4}} │ {:^{width5}} │ {:^{width6}} │'.format(
+                        #str(downloaded), str(in_storage), str(bad_rating), str(blacklisted), str(bad_tag), str(bad_score), str(bad_fav_count),
+                        #width0 = len(col_titles[0]), width1 = len(col_titles[1]), width2 = len(col_titles[2]), width3 = len(col_titles[3]), width4 = len(col_titles[4]), width5 = len(col_titles[5]), width6 = len(col_titles[6])
+                        #), end = '\r', flush = True)
 
                 # Print bottom of table. Break while loop. End program.
                 if last_id == 0:
-                    print('')
-                    print('└─' + '─' * len(col_titles[0]) + '─┴─' + '─' * len(col_titles[1]) + '─┴─' + '─' * len(col_titles[2]) + '─┴─' + '─' * len(col_titles[3]) + '─┴─' + '─' * len(col_titles[4]) + '─┘')
+                    #print('')
+                    #print('└─' + '─' * len(col_titles[0]) + '─┴─' + '─' * len(col_titles[1]) + '─┴─' + '─' * len(col_titles[2]) + '─┴─' + '─' * len(col_titles[3]) + '─┴─' + '─' * len(col_titles[4]) + '─┴─' + '─' * len(col_titles[5]) + '─┴─' + '─' * len(col_titles[6]) + '─┘')
 
                     break
 

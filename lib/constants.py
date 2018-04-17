@@ -19,6 +19,7 @@ include_md5 = false
 days = 1
 ratings = s
 min_score = 0
+min_favs = 0
 
 [Blacklist]
 tags =
@@ -32,6 +33,7 @@ tags =
 ; days = 1
 ; ratings = s, q, e
 ; min_score = -100
+; min_favs = 0
 ; tags = tag1, tag2, tag3, ...
 
 ; Example:
@@ -39,4 +41,5 @@ tags =
 ; days = 30
 ; ratings = s
 ; min_score = 5
+; min_favs = 20
 ; tags = cat, cute'''

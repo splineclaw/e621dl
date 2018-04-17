@@ -28,12 +28,12 @@ def get_github_release(session):
 
     return response.json()['tag_name'].strip('v')
 
-def get_posts(search_string, min_score, earliest_date, last_id, session):
+def get_posts(search_string, earliest_date, last_id, session):
     url = 'https://e621.net/post/index.json'
     payload = {
         'limit': constants.MAX_RESULTS,
         'before_id': str(last_id),
-        'tags': 'score:>=' + str(min_score) + ' ' + 'date:>=' + str(earliest_date) + ' ' + search_string
+        'tags': 'date:>=' + str(earliest_date) + ' ' + search_string
     }
 
     response = delayed_post(url, payload, session)
@@ -54,7 +54,7 @@ def get_tag_alias(user_tag, session):
     prefix = ''
 
     if ':' in user_tag:
-        print('[!] It is not possible to check if (' + user_tag + ') is valid.')
+        print('[!] It is not possible to check if' + user_tag + ' is valid.')
         return user_tag
 
     if user_tag[0] == '~':
@@ -74,12 +74,12 @@ def get_tag_alias(user_tag, session):
     results = response.json()
 
     if '*' in user_tag and results:
-        print('[✓] The tag (' + user_tag + ') is valid.')
+        print('[✓] The tag ' + user_tag + ' is valid.')
         return user_tag
 
     for tag in results:
         if user_tag == tag['name']:
-            print('[✓] The tag (' + prefix + user_tag + ') is valid.')
+            print('[✓] The tag ' + prefix + user_tag + ' is valid.')
             return prefix + user_tag
 
     url = 'https://e621.net/tag_alias/index.json'
@@ -100,7 +100,7 @@ def get_tag_alias(user_tag, session):
 
             results = response.json()
 
-            print('[✓] The tag (' + prefix + user_tag + ') was changed to (' + prefix + results['name'] + ').')
+            print('[✓] The tag ' + prefix + user_tag + ' was changed to ' + prefix + results['name'] + '.')
 
             return prefix + results['name']
 
@@ -130,7 +130,7 @@ def finish_partial_downloads(session):
     for root, dirs, files in os.walk('downloads/'):
         for file in files:
             if file.endswith(constants.PARTIAL_DOWNLOAD_EXT):
-                print('[!] Partial download (' + file + ') found.')
+                print('[!] Partial download ' + file + ' found.')
 
                 path = os.path.join(root, file)
                 url = get_known_post(file.split('.')[0], session)['file_url']
