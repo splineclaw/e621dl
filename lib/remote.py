@@ -2,19 +2,15 @@
 import os
 from time import sleep
 from timeit import default_timer
-#from traceback import print_exc
 
 # External Imports
 import requests
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
-#from requests.exceptions import ConnectionError, ChunkedEncodingError
 
 # Personal Imports
 from . import constants
 from . import local
-
-
 
 def delayed_post(url, payload, session):
     # Take time before and after getting the requests response.
@@ -127,6 +123,12 @@ def download_post(url, path, session):
 
     header = {'Range': 'bytes=' + str(os.path.getsize(path)) + '-'}
     response = session.get(url, stream = True, headers = header)
+    
+    if response.status_code in range(400,499+1):
+        print('[!] url ' + url + ' is not available, error code: ' +str(response.status_code))
+        os.remove(path)
+        return False
+    
     response.raise_for_status()
 
     with open(path, 'ab') as outfile:
@@ -134,6 +136,7 @@ def download_post(url, path, session):
             outfile.write(chunk)
 
     os.rename(path, path.replace('.' + constants.PARTIAL_DOWNLOAD_EXT, ''))
+    return True
 
 def finish_partial_downloads(session):
     for root, dirs, files in os.walk('downloads/'):
@@ -145,11 +148,9 @@ def finish_partial_downloads(session):
                 url = get_known_post(file.split('.')[0], session)['file_url']
 
                 download_post(url, path, session)
-                
-                
 
 def requests_retry_session(
-    retries=14,
+    retries=6,
     backoff_factor=0.1,
     status_forcelist=(500, 502, 504),
     session=None,

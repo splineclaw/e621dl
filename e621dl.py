@@ -2,9 +2,7 @@
 import os
 from distutils.version import StrictVersion
 from fnmatch import fnmatch
-
-# External Imports
-import requests
+from shutil import copy
 
 # Personal Imports
 from lib import constants
@@ -16,7 +14,7 @@ if __name__ == '__main__':
 
     # Create the requests session that will be used throughout the run and set the user-agent.
     # The user-agent requirements are specified at (https://e621.net/help/show/api#basics).
-    with requests.Session() as session:
+    with remote.requests_retry_session() as session:
         session.headers['User-Agent'] = constants.USER_AGENT
         
         # Check if a new version is released on github. If so, notify the user.
@@ -40,7 +38,7 @@ if __name__ == '__main__':
         # Initialize the lists that will be used to filter posts.
         blacklist = []
         searches = []
-
+        files = local.get_files_dict()
         # Initialize user configured options in case any are missing.
         include_md5 = False # The md5 checksum is not appended to file names.
         default_date = local.get_date(1) # Get posts from one day before execution.
@@ -172,8 +170,10 @@ if __name__ == '__main__':
 
                 for post in results:
                     if include_md5:
+                        filename='{}.{}.{}'.format(post['id'],post['md5'],post['file_ext'])
                         path = local.make_path(directory, str(post['id']) + '.' + str(post['md5']), post['file_ext'])
                     else:
+                        filename='{}.{}'.format(post['id'],post['file_ext'])
                         path = local.make_path(directory, str(post['id']), post['file_ext'])
 
                     if post['id'] == dummy_id:
@@ -181,6 +181,11 @@ if __name__ == '__main__':
                     elif os.path.isfile(path):
                         print('[✗] Post ' + str(post['id']) + ' was already downloaded.')
                         in_storage += 1
+                    elif filename in files:
+                        print('[✗] Post {} was already downloaded to another folder'.format( str(post['id']) ))
+                        copy(files[filename],path)
+                        in_storage += 1
+                        
                     elif post['rating'] not in ratings:
                         print('[✗] Post ' + str(post['id']) + ' does not have a requested rating.')
                         bad_rating += 1
@@ -200,9 +205,8 @@ if __name__ == '__main__':
                         bad_fav_count += 1
                     else:
                         print('[✓] Post ' + str(post['id']) + ' is being downloaded.')
-                        downloaded += 1
-                        remote.download_post(post['file_url'], path, session)
-
+                        if remote.download_post(post['file_url'], path, session):
+                            downloaded += 1
                     # Prints the numerical values of the search results.
                     #print('│ {:^{width0}} │ {:^{width1}} │ {:^{width2}} │ {:^{width3}} │ {:^{width4}} │ {:^{width5}} │ {:^{width6}} │'.format(
                         #str(downloaded), str(in_storage), str(bad_rating), str(blacklisted), str(bad_tag), str(bad_score), str(bad_fav_count),
