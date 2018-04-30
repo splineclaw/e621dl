@@ -2,10 +2,19 @@
 import os
 from time import sleep
 from timeit import default_timer
+#from traceback import print_exc
+
+# External Imports
+import requests
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
+#from requests.exceptions import ConnectionError, ChunkedEncodingError
 
 # Personal Imports
 from . import constants
 from . import local
+
+
 
 def delayed_post(url, payload, session):
     # Take time before and after getting the requests response.
@@ -136,3 +145,25 @@ def finish_partial_downloads(session):
                 url = get_known_post(file.split('.')[0], session)['file_url']
 
                 download_post(url, path, session)
+                
+                
+
+def requests_retry_session(
+    retries=14,
+    backoff_factor=0.1,
+    status_forcelist=(500, 502, 504),
+    session=None,
+):
+    session = session or requests.Session()
+    retry = Retry(
+        total=retries,
+        read=retries,
+        connect=retries,
+        backoff_factor=backoff_factor,
+        status_forcelist=status_forcelist,
+        method_whitelist=frozenset(['GET', 'POST'])
+    )
+    adapter = HTTPAdapter(max_retries=retry)
+    session.mount('http://', adapter)
+    session.mount('https://', adapter)
+    return session
