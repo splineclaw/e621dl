@@ -207,6 +207,7 @@ if __name__ == '__main__':
                         print('[✓] Post ' + str(post['id']) + ' is being downloaded.')
                         if remote.download_post(post['file_url'], path, session):
                             downloaded += 1
+                            files[filename]=path
                     # Prints the numerical values of the search results.
                     #print('│ {:^{width0}} │ {:^{width1}} │ {:^{width2}} │ {:^{width3}} │ {:^{width4}} │ {:^{width5}} │ {:^{width6}} │'.format(
                         #str(downloaded), str(in_storage), str(bad_rating), str(blacklisted), str(bad_tag), str(bad_score), str(bad_fav_count),
