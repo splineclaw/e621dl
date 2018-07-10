@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # Internal Imports
 import os
 from distutils.version import StrictVersion
