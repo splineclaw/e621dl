@@ -1,5 +1,4 @@
 # Internal Imports
-import argparse
 import configparser
 import datetime
 import os
@@ -48,3 +47,11 @@ def make_path(dir_name, filename, ext):
         os.makedirs('downloads/' + clean_dir_name)
 
     return 'downloads/' + clean_dir_name + '/' + filename + '.' + ext
+
+def get_files_dict():
+    filedict={}
+    for root, dirs, files in os.walk('downloads/'):
+        for file in files:
+            filedict[file]='{}/{}'.format(root,file)
+    
+    return filedict
