@@ -1,4 +1,4 @@
-VERSION = '4.5.0'
+VERSION = '4.5.1'
 VERSION_NOTE = 'Forked from 2.4.6'
 
 LOGGER_FORMAT = '%(name)-11s %(levelname)-8s %(message)s'
@@ -12,9 +12,6 @@ DEFAULT_CONFIG_TEXT = ''';;;;;;;;;;;;;;
 ;; GENERAL  ;;
 ;;;;;;;;;;;;;;
 
-[Other]
-include_md5 = false
-
 [Defaults]
 days = 1
 ratings = s
@@ -23,6 +20,9 @@ min_favs = 0
 
 [Blacklist]
 tags =
+
+[Other]
+include_md5 = false
 
 ;;;;;;;;;;;;;;;;;;;
 ;; SEARCH GROUPS ;;

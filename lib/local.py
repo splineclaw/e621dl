@@ -9,7 +9,7 @@ from . import constants
 def make_config():
     with open('config.ini', 'wt', encoding = 'utf_8_sig') as outfile:
         outfile.write(constants.DEFAULT_CONFIG_TEXT)
-        print('[i] New default config file created. Please add tag groups to this file.')
+        print("[i] New default config file created. Please add tag groups to this file.'")
 
     raise SystemExit
 
@@ -17,7 +17,7 @@ def get_config():
     config = configparser.ConfigParser()
 
     if not os.path.isfile('config.ini'):
-        print('[!] No config file found.')
+        print("[!] No config file found.")
         make_config()
 
     with open('config.ini', 'rt', encoding = 'utf_8_sig') as infile:
@@ -43,15 +43,7 @@ def substitute_illegals(char):
 def make_path(dir_name, filename, ext):
     clean_dir_name = ''.join([substitute_illegals(char) for char in dir_name]).lower()
 
-    if not os.path.isdir('downloads/' + clean_dir_name):
-        os.makedirs('downloads/' + clean_dir_name)
+    if not os.path.isdir(f"downloads/{clean_dir_name}"):
+        os.makedirs(f"downloads/{clean_dir_name}")
 
-    return 'downloads/' + clean_dir_name + '/' + filename + '.' + ext
-
-def get_files_dict():
-    filedict={}
-    for root, dirs, files in os.walk('downloads/'):
-        for file in files:
-            filedict[file]='{}/{}'.format(root,file)
-    
-    return filedict
+    return f"downloads/{clean_dir_name}/{filename}.{ext}"
