@@ -7,11 +7,11 @@ from distutils.version import StrictVersion
 from fnmatch import fnmatch
 
 # Personal Imports
-from lib import constants
-from lib import local
-from lib import remote
+from e621dl import constants
+from e621dl import local
+from e621dl import remote
 
-# This block will only be read if e621dl.py is directly executed by python. Not if it is imported.
+# This block will only be read if e621dl.py is directly executed as a script. Not if it is imported.
 if __name__ == '__main__':
 
     # Create the requests session that will be used throughout the run and set the user-agent.

@@ -4,8 +4,8 @@ from time import sleep
 from timeit import default_timer
 
 # Personal Imports
-from . import constants
-from . import local
+from e621dl import constants
+from e621dl import local
 
 # Vendor Imports
 import requests

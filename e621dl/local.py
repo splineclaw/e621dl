@@ -4,7 +4,7 @@ import datetime
 import os
 
 # Personal Imports
-from . import constants
+from e621dl import constants
 
 def make_config():
     with open('config.ini', 'wt', encoding = 'utf_8_sig') as outfile:
