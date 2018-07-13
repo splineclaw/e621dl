@@ -152,7 +152,8 @@ def download_post(url, path, session):
 
         os.rename(path, path.replace(f".{constants.PARTIAL_DOWNLOAD_EXT}", ''))
 
-    print(f"[!] The downoad URL {url} is not available. Error code: {response.status_code}.")
+    else:
+        print(f"[!] The downoad URL {url} is not available. Error code: {response.status_code}.")
 
 def finish_partial_downloads(session):
     for root, dirs, files in os.walk('downloads/'):
