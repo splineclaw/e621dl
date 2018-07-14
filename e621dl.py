@@ -14,26 +14,24 @@ from e621dl import remote
 # This block will only be read if e621dl.py is directly executed as a script. Not if it is imported.
 if __name__ == '__main__':
 
-    # Create the requests session that will be used throughout the run and set the user-agent.
-    # The user-agent requirements are specified at (https://e621.net/help/show/api#basics).
+    # Create the requests session that will be used throughout the run.
     with remote.requests_retry_session() as session:
-        session.headers['User-Agent'] = constants.USER_AGENT
+        # Set the user-agent. Requirements are specified at https://e621.net/help/show/api#basics.
+        session.headers['User-Agent'] = f"e621dl (Wulfre) -- Version {constants.VERSION}"
         
         # Check if a new version is released on github. If so, notify the user.
         if StrictVersion(constants.VERSION) < StrictVersion(remote.get_github_release(session)):
-            print('A NEW VERSION OF e621dl IS AVAILABLE ON GITHUB: (https://github.com/Wulfre/e621dl/releases/latest).')
+            print('A NEW VERSION OF e621dl IS AVAILABLE ON GITHUB AT https://github.com/Wulfre/e621dl/releases/latest.')
 
         print(f"[i] Running e621dl version {constants.VERSION}.")
-
         print('')
-
         print("[i] Checking for partial downloads...")
 
         remote.finish_partial_downloads(session)
 
         print('')
-
         print("[i] Parsing config...")
+
         config = local.get_config()
 
         # Initialize the lists that will be used to filter posts.
@@ -104,25 +102,17 @@ if __name__ == '__main__':
 
                 # Append the final values that will be used for the specific section to the list of searches.
                 # Note section_tags is a list within a list.
-                searches.append([section, section_tags, section_ratings, section_score, section_favs, section_date])
+                searches.append({'directory': section, 'tags': section_tags, 'ratings': section_ratings, 'min_score': section_score, 'min_favs': section_favs, 'earliest_date': section_date})
 
         for search in searches:
             print('')
 
-            # Re-assign each element of the search list to an easier to remember name. There is probably a better way.
-            directory = search[0]
-            tags = search[1]
-            ratings = search[2]
-            min_score = search[3]
-            min_favs = search[4]
-            earliest_date = search[5]
-
             # Creates the string to be sent to the API.
             # Currently only 5 items can be sent directly so the rest are discarded to be filtered out later.
-            if len(tags) > 5:
-                search_string = ' '.join(tags[:5])
+            if len(search['tags']) > 5:
+                search_string = ' '.join(search['tags'][:5])
             else:
-                search_string = ' '.join(tags)
+                search_string = ' '.join(search['tags'])
 
             # Initializes last_id (the last post found in a search) to an enormous number so that the newest post will be found.
             # This number is hard-coded because on 64-bit archs, sys.maxsize() will return a number too big for e621 to use.
@@ -131,7 +121,7 @@ if __name__ == '__main__':
             # Sets up a loop that will continue indefinitely until the last post of a search has been found.
             while True:
                 print("[i] Getting posts...")
-                results = remote.get_posts(search_string, earliest_date, last_id, session)
+                results = remote.get_posts(search_string, search['earliest_date'], last_id, session)
 
                 # Gets the id of the last post found in the search so that the search can continue.
                 # If the number of results is less than the max, the next searches will always return 0 results.
@@ -143,22 +133,22 @@ if __name__ == '__main__':
 
                 for post in results:
                     if include_md5:
-                        path = local.make_path(directory, f"{post['id']}.{post['md5']}", post['file_ext'])
+                        path = local.make_path(search['directory'], f"{post['id']}.{post['md5']}", post['file_ext'])
                     else:
-                        path = local.make_path(directory, post['id'], post['file_ext'])
+                        path = local.make_path(search['directory'], post['id'], post['file_ext'])
 
                     if os.path.isfile(path):
                         print(f"[✗] Post {post['id']} was already downloaded.")
-                    elif post['rating'] not in ratings:
+                    elif post['rating'] not in search['ratings']:
                         print(f"[✗] Post {post['id']} was skipped for missing a requested rating.")
                     # Using fnmatch allows for wildcards to be properly filtered.
                     elif [x for x in post['tags'].split() if any(fnmatch(x, y) for y in blacklist)]:
                         print(f"[✗] Post {post['id']} was skipped for having a blacklisted tag.")
-                    elif not set(tags[4:]).issubset(post['tags'].split()):
+                    elif not set(search['tags'][4:]).issubset(post['tags'].split()):
                         print(f"[✗] Post {post['id']} was skipped for missing a requested tag.")
-                    elif int(post['score']) < min_score:
+                    elif int(post['score']) < search['min_score']:
                         print(f"[✗] Post {post['id']} was skipped for having a low score.")
-                    elif int(post['fav_count']) < min_favs:
+                    elif int(post['fav_count']) < search['min_favs']:
                         print(f"[✗] Post {post['id']} was skipped for having a low favorite count.")
                     else:
                         print(f"[✓] Post {post['id']} is being downloaded.")

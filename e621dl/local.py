@@ -10,7 +10,6 @@ def make_config():
     with open('config.ini', 'wt', encoding = 'utf_8_sig') as outfile:
         outfile.write(constants.DEFAULT_CONFIG_TEXT)
         print("[i] New default config file created. Please add tag groups to this file.'")
-
     raise SystemExit
 
 def get_config():
@@ -33,11 +32,10 @@ def get_date(days_to_check):
     elif ordinal_check_date > datetime.date.today().toordinal():
         ordinal_check_date = datetime.date.today().toordinal()
 
-    return datetime.date.fromordinal(ordinal_check_date).strftime(constants.DATE_FORMAT)
+    return datetime.date.fromordinal(ordinal_check_date).strftime('%Y-%m-%d')
 
 def substitute_illegals(char):
     illegals = ['\\', ':', '*', '?', '\"', '<', '>', '|', ' ']
-
     return '_' if char in illegals else char
 
 def make_path(dir_name, filename, ext):
