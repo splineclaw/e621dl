@@ -18,7 +18,7 @@ if __name__ == '__main__':
     with remote.requests_retry_session() as session:
         # Set the user-agent. Requirements are specified at https://e621.net/help/show/api#basics.
         session.headers['User-Agent'] = f"e621dl (Wulfre) -- Version {constants.VERSION}"
-        
+
         # Check if a new version is released on github. If so, notify the user.
         if StrictVersion(constants.VERSION) < StrictVersion(remote.get_github_release(session)):
             print('A NEW VERSION OF e621dl IS AVAILABLE ON GITHUB AT https://github.com/Wulfre/e621dl/releases/latest.')
@@ -76,6 +76,7 @@ if __name__ == '__main__':
 
                 # Initialize the list of tags that will be searched.
                 section_tags = []
+                section_blacklist = []
 
                 # Default options are set in case the user did not declare any for the specific section.
                 section_date = default_date
@@ -99,10 +100,14 @@ if __name__ == '__main__':
                         section_favs = int(value)
                     elif option.lower() in {'ratings', 'rating'}:
                         section_ratings = value.replace(',', ' ').lower().strip().split()
+                    elif option.lower() in {'blacklist'}:
+                        section_blacklist = [remote.get_tag_alias(tag.lower(), session) for tag in value.replace(',', ' ').replace(',', ' ').lower().strip().split()]
 
                 # Append the final values that will be used for the specific section to the list of searches.
                 # Note section_tags is a list within a list.
-                searches.append({'directory': section, 'tags': section_tags, 'ratings': section_ratings, 'min_score': section_score, 'min_favs': section_favs, 'earliest_date': section_date})
+                searches.append({'directory': section, 'tags': section_tags, 'ratings': section_ratings,
+                                 'min_score': section_score, 'min_favs': section_favs, 'earliest_date': section_date,
+                                 'blacklist': section_blacklist})
 
         for search in searches:
             print('')
@@ -143,7 +148,9 @@ if __name__ == '__main__':
                         print(f"[✗] Post {post['id']} was skipped for missing a requested rating.")
                     # Using fnmatch allows for wildcards to be properly filtered.
                     elif [x for x in post['tags'].split() if any(fnmatch(x, y) for y in blacklist)]:
-                        print(f"[✗] Post {post['id']} was skipped for having a blacklisted tag.")
+                        print(f"[✗] Post {post['id']} was skipped for having a globally blacklisted tag.")
+                    elif [x for x in post['tags'].split() if any(fnmatch(x, y) for y in search['blacklist'])]:
+                        print(f"[✗] Post {post['id']} was skipped for having a locally blacklisted tag.")
                     elif not set(search['tags'][4:]).issubset(post['tags'].split()):
                         print(f"[✗] Post {post['id']} was skipped for missing a requested tag.")
                     elif int(post['score']) < search['min_score']:
