@@ -30,6 +30,7 @@ include_md5 = false
 ; min_score = -100
 ; min_favs = 0
 ; tags = tag1, tag2, tag3, ...
+; blacklist = tag1, tag2, tag3, ...
 
 ; Example:
 ; [Cute Cats]
@@ -37,4 +38,5 @@ include_md5 = false
 ; ratings = s
 ; min_score = 5
 ; min_favs = 20
-; tags = cat, cute'''
+; tags = cat, cute
+; blacklist = animated'''
